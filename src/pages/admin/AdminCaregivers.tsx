@@ -1,77 +1,117 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { DBCaregiver } from '@/types/supabase-tables';
 
-interface Caregiver extends DBCaregiver {
-  patients_count?: number;
-  user?: { email: string };
+interface CaregiverProfile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  role: string;
+  created_at: string;
+  patients_count: number;
 }
 
 interface ProfileUser {
   id: string;
   email: string;
-  full_name: string | null;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  role: string;
   created_at: string;
 }
 
 export function AdminCaregivers() {
-  const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
+  const [caregivers, setCaregivers] = useState<CaregiverProfile[]>([]);
   const [allUsers, setAllUsers] = useState<ProfileUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // ... rest of your component with proper types
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
-    // Load current caregivers
-    const { data: caregiversData } = await supabase
-      .from('caregivers')
-      .select('*, user:user_id(email)')
-      .order('created_at', { ascending: false });
+    try {
+      // Load current caregivers (profiles with role = 'caregiver')
+      const { data: caregiversData, error: caregiversError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          first_name,
+          last_name,
+          role,
+          created_at,
+          patients_count:caregiver_patients(count)
+        `)
+        .eq('role', 'caregiver')
+        .order('created_at', { ascending: false });
 
-    // Load all auth users (you'll need a custom function for this)
-    const { data: usersData } = await supabase
-      .from('profiles') // Assuming you have a profiles table
-      .select('*')
-      .order('email');
+      if (caregiversError) throw caregiversError;
 
-    setCaregivers(caregiversData || []);
-    setAllUsers(usersData || []);
-    setLoading(false);
-  };
+      // Format caregivers with full_name and patient count
+      const formattedCaregivers = (caregiversData || []).map(c => ({
+        ...c,
+        full_name: `${c.first_name} ${c.last_name}`,
+        patients_count: c.patients_count?.[0]?.count || 0
+      }));
 
-  const grantCaregiverAccess = async (userId, email, fullName) => {
-    const { error } = await supabase
-      .from('caregivers')
-      .insert([{
-        user_id: userId,
-        email: email,
-        full_name: fullName
-      }]);
+      // Load all non-caregiver users for granting access
+      const { data: usersData, error: usersError } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name, role, created_at')
+        .neq('role', 'caregiver')
+        .order('email');
 
-    if (error) {
-      alert('Error: ' + error.message);
-    } else {
-      loadData();
+      if (usersError) throw usersError;
+
+      const formattedUsers = (usersData || []).map(u => ({
+        ...u,
+        full_name: `${u.first_name} ${u.last_name}`
+      }));
+
+      setCaregivers(formattedCaregivers);
+      setAllUsers(formattedUsers);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const revokeCaregiverAccess = async (caregiverId) => {
-    if (!confirm('Remove caregiver access? This will prevent them from managing patients.')) return;
+  const grantCaregiverAccess = async (userId: string, email: string, fullName: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: 'caregiver' })
+        .eq('id', userId);
 
-    const { error } = await supabase
-      .from('caregivers')
-      .delete()
-      .eq('id', caregiverId);
+      if (error) throw error;
+      
+      // Reload data
+      await loadData();
+    } catch (error: any) {
+      alert('Error granting caregiver access: ' + error.message);
+    }
+  };
 
-    if (error) {
-      alert('Error: ' + error.message);
-    } else {
-      loadData();
+  const revokeCaregiverAccess = async (userId: string) => {
+    if (!confirm('Remove caregiver access? This will change their role to patient.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: 'patient' })
+        .eq('id', userId);
+
+      if (error) throw error;
+      
+      // Reload data
+      await loadData();
+    } catch (error: any) {
+      alert('Error revoking caregiver access: ' + error.message);
     }
   };
 
@@ -80,99 +120,110 @@ export function AdminCaregivers() {
     user.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
-    <div>
-      <h2>Manage Caregiver Access</h2>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold text-charcoal mb-4">Manage Caregiver Access</h2>
+      </div>
       
-      <div className="caregiver-section">
-        <h3>Current Caregivers</h3>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Added On</th>
-              <th>Patients Count</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {caregivers.map(c => (
-              <tr key={c.id}>
-                <td>{c.full_name}</td>
-                <td>{c.email}</td>
-                <td>{new Date(c.created_at).toLocaleDateString()}</td>
-                <td>{c.patients_count || 0}</td>
-                <td>
-                  <button 
-                    onClick={() => revokeCaregiverAccess(c.id)}
-                    className="danger-btn"
-                  >
-                    Revoke Access
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Current Caregivers Section */}
+      <div className="bg-white rounded-xl shadow-soft p-6">
+        <h3 className="text-lg font-semibold text-charcoal mb-4">Current Caregivers</h3>
+        
+        {caregivers.length === 0 ? (
+          <p className="text-medium-gray text-center py-8">No caregivers found</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-soft-taupe/20">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Email</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Added On</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Patients</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-soft-taupe/30">
+                {caregivers.map(c => (
+                  <tr key={c.id} className="hover:bg-soft-taupe/10">
+                    <td className="px-4 py-3 text-charcoal">{c.full_name}</td>
+                    <td className="px-4 py-3 text-medium-gray">{c.email}</td>
+                    <td className="px-4 py-3 text-medium-gray">{new Date(c.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-medium-gray">{c.patients_count}</td>
+                    <td className="px-4 py-3">
+                      <button 
+                        onClick={() => revokeCaregiverAccess(c.id)}
+                        className="px-3 py-1 bg-gentle-coral/10 text-gentle-coral rounded-lg hover:bg-gentle-coral/20 transition-colors text-sm"
+                      >
+                        Revoke Access
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      <div className="user-section">
-        <h3>Grant New Caregiver Access</h3>
+      {/* Grant New Caregiver Access Section */}
+      <div className="bg-white rounded-xl shadow-soft p-6">
+        <h3 className="text-lg font-semibold text-charcoal mb-4">Grant New Caregiver Access</h3>
+        
         <input
           type="text"
           placeholder="Search users by name or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
+          className="w-full px-4 py-2 border border-soft-taupe rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-warm-bronze"
         />
 
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Joined</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map(user => {
-              const isAlreadyCaregiver = caregivers.some(c => c.user_id === user.id);
-              return (
-                <tr key={user.id}>
-                  <td>{user.full_name || 'Not set'}</td>
-                  <td>{user.email}</td>
-                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                  <td>
-                    {isAlreadyCaregiver ? (
-                      <span className="badge success">Caregiver</span>
-                    ) : (
-                      <span className="badge">User</span>
-                    )}
-                  </td>
-                  <td>
-                    {!isAlreadyCaregiver && (
+        {filteredUsers.length === 0 ? (
+          <p className="text-medium-gray text-center py-8">No users found</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-soft-taupe/20">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Email</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Current Role</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Joined</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-charcoal">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-soft-taupe/30">
+                {filteredUsers.map(user => (
+                  <tr key={user.id} className="hover:bg-soft-taupe/10">
+                    <td className="px-4 py-3 text-charcoal">{user.full_name}</td>
+                    <td className="px-4 py-3 text-medium-gray">{user.email}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-1 bg-soft-taupe/20 rounded-full text-xs capitalize">
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-medium-gray">{new Date(user.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3">
                       <button
                         onClick={() => grantCaregiverAccess(
                           user.id, 
                           user.email, 
-                          user.full_name || user.email.split('@')[0]
+                          user.full_name
                         )}
-                        className="success-btn"
+                        className="px-3 py-1 bg-soft-sage/20 text-soft-sage rounded-lg hover:bg-soft-sage/30 transition-colors text-sm"
                       >
                         Grant Caregiver Access
                       </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

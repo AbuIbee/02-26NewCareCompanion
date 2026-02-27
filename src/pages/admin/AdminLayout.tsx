@@ -43,10 +43,16 @@ export default function AdminLayout() {
         return;
       }
 
-      // 👇 REPLACE THESE EMAILS WITH YOUR ACTUAL EMAIL
-      const adminEmails = ['solodeen@gmail.com', 'backup-admin@email.com'];
-      
-      if (adminEmails.includes(user.email || '')) {
+      // Check if user has admin role in profiles table
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      if (profile?.role === 'admin') {
         setIsAdmin(true);
       } else {
         window.location.href = '/unauthorized';
@@ -87,14 +93,14 @@ export default function AdminLayout() {
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-primary-600">CareCompanion Admin</h1>
+            <h1 className="text-2xl font-bold text-warm-bronze">CareCompanion Admin</h1>
             
             <div className="flex space-x-2">
               <button
                 onClick={() => navigateTo('caregivers')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   currentAdminView === 'caregivers'
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-warm-bronze text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -105,7 +111,7 @@ export default function AdminLayout() {
                 onClick={() => navigateTo('patients')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   currentAdminView === 'patients'
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-warm-bronze text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -116,7 +122,7 @@ export default function AdminLayout() {
                 onClick={() => navigateTo('audit')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   currentAdminView === 'audit'
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-warm-bronze text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -124,7 +130,7 @@ export default function AdminLayout() {
               </button>
             </div>
 
-            {/* Optional: Add logout button */}
+            {/* Logout button */}
             <button
               onClick={() => {
                 supabase.auth.signOut();
