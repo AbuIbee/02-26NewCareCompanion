@@ -5,3 +5,5 @@ dist
 .env.*
 02-26NewCareCompanion/
 .vercel/"dist/" 
+.vercel
+.env*.local

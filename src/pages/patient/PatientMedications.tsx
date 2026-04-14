@@ -216,7 +216,7 @@ function AddMedForm({ onSave, onClose }: { onSave: (m: LocalMed) => void; onClos
           {DAY_LABELS.map((d, i) => (
             <button key={i} onClick={() => toggleDay(i)}
               className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${
-                daysOfWeek.includes(i) ? 'bg-warm-bronze text-white' : 'bg-soft-taupe/30 text-medium-gray hover:bg-soft-taupe'
+                daysOfWeek.includes(i) ? 'bg-warm-bronze/20 text-warm-bronze font-bold ring-2 ring-warm-bronze' : 'bg-soft-taupe/30 text-medium-gray hover:bg-soft-taupe'
               }`}>
               {d}
             </button>
@@ -504,9 +504,9 @@ export default function PatientMedications() {
     const taken  = doses.filter(x => getStatus(x.medId, d, x.time) === 'taken').length;
     const missed = doses.filter(x => getStatus(x.medId, d, x.time) === 'missed').length;
     const pct = taken / doses.length;
-    if (pct === 1)   return 'bg-soft-sage text-white';
-    if (pct >= 0.5)  return 'bg-warm-amber/80 text-white';
-    if (missed > 0)  return 'bg-gentle-coral/70 text-white';
+    if (pct === 1)   return 'bg-soft-sage/40 text-charcoal';
+    if (pct >= 0.5)  return 'bg-warm-amber/40 text-charcoal';
+    if (missed > 0)  return 'bg-gentle-coral/40 text-charcoal';
     return 'bg-soft-taupe/30 text-medium-gray';
   };
 
@@ -773,9 +773,9 @@ export default function PatientMedications() {
             {/* Legend */}
             <div className="flex gap-4 justify-center flex-wrap text-xs text-medium-gray">
               {[
-                { cls: 'bg-soft-sage',         label: '100% taken' },
-                { cls: 'bg-warm-amber/80',      label: '≥50% taken' },
-                { cls: 'bg-gentle-coral/70',    label: 'Missed doses' },
+                { cls: 'bg-soft-sage/40',         label: '100% taken' },
+                { cls: 'bg-warm-amber/40',      label: '≥50% taken' },
+                { cls: 'bg-gentle-coral/40',    label: 'Missed doses' },
                 { cls: 'bg-soft-taupe/30',      label: 'No doses' },
               ].map(l => (
                 <span key={l.label} className="flex items-center gap-1.5">

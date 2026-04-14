@@ -34,12 +34,21 @@ export default function LandingPage() {
             </div>
             <span className="text-xl font-semibold text-charcoal">MemoriaHelps</span>
           </div>
-          <Button
-            onClick={handleGetStarted}
-            className="bg-warm-bronze hover:bg-deep-bronze text-white rounded-xl px-6"
-          >
-            Get Started
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleGetStarted}
+              className="border-2 border-warm-bronze text-warm-bronze hover:bg-warm-bronze hover:text-white rounded-xl px-5 font-semibold"
+            >
+              Sign In
+            </Button>
+            <Button
+              onClick={handleGetStarted}
+              className="bg-warm-bronze hover:bg-deep-bronze text-white rounded-xl px-6"
+            >
+              Get Started
+            </Button>
+          </div>
         </div>
       </header>
 
