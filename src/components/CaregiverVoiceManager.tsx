@@ -126,10 +126,10 @@ export default function CaregiverVoiceManager() {
     reader.onload = ev => {
       const base64 = ev.target?.result as string;
       localStorage.setItem('customVoiceUrl', base64);
-      localStorage.setItem('customVoiceLabel', customVoiceLabel || 'Care Partner Recording');
+      localStorage.setItem('customVoiceLabel', customVoiceLabel || 'Caregiver Recording');
       localStorage.setItem('selectedVoice', 'custom');
       setCustomVoiceUrl(base64);
-      setCustomVoiceLabel(customVoiceLabel || 'Care Partner Recording');
+      setCustomVoiceLabel(customVoiceLabel || 'Caregiver Recording');
       setSelectedVoice('custom');
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);

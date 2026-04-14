@@ -143,7 +143,7 @@ export const TIERS: Record<TierName, TierConfig> = {
       { label: '1 family photo', included: true },
       { label: 'Medication tracking', included: false },
       { label: 'Family memory vault', included: false },
-      { label: 'Care Partner check-in', included: false },
+      { label: 'Caregiver check-in', included: false },
       { label: 'Games & brain training', included: false },
       { label: 'Videos & media', included: false },
       { label: 'Voice messages from family', included: false },
@@ -163,7 +163,7 @@ export const TIERS: Record<TierName, TierConfig> = {
       { label: 'Everything in Companion', included: true },
       { label: 'Unlimited reminders', included: true, highlight: true },
       { label: 'Medication tracker + logs', included: true, highlight: true },
-      { label: 'Care Partner check-in (A–G)', included: true, highlight: true },
+      { label: 'Caregiver check-in (A–G)', included: true, highlight: true },
       { label: 'Family photo vault (unlimited)', included: true },
       { label: 'Family & memory categories', included: true },
       { label: 'Mood history & trends', included: true },
@@ -216,7 +216,7 @@ export const TIERS: Record<TierName, TierConfig> = {
 export type FeatureKey =
   | 'reminders_unlimited'
   | 'medications'
-  | 'care_partner_checkin'
+  | 'caregiver_checkin'
   | 'memories_unlimited'
   | 'mood_history'
   | 'games'
@@ -230,7 +230,7 @@ export type FeatureKey =
 const FEATURE_ACCESS: Record<FeatureKey, TierName[]> = {
   reminders_unlimited:  ['daily_care', 'full_support', 'master'],
   medications:          ['daily_care', 'full_support', 'master'],
-  care_partner_checkin: ['daily_care', 'full_support', 'master'],
+  caregiver_checkin: ['daily_care', 'full_support', 'master'],
   memories_unlimited:   ['daily_care', 'full_support', 'master'],
   mood_history:         ['daily_care', 'full_support', 'master'],
   games:                ['daily_care', 'full_support', 'master'],

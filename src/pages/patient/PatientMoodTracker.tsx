@@ -41,7 +41,7 @@ const MOODS: { type: MoodType; emoji: string; label: string; bg: string; ring: s
 
 const moodOf = (type: MoodType) => MOODS.find(m => m.type === type) ?? MOODS[0];
 
-// ── Score mapping for Care Partner fields (5 levels: 0=worst, 4=best) ───────
+// ── Score mapping for Caregiver fields (5 levels: 0=worst, 4=best) ───────
 const SCORE_MAP: Record<string, number> = {
   // Daily Function
   'Independent': 4, 'Needs cues': 3, 'Needs hands-on help': 2, 'Dependent': 1,
@@ -84,7 +84,7 @@ function getScore(value: string | null, defaultValue: number = 2): number {
   return SCORE_MAP[value] !== undefined ? SCORE_MAP[value] : defaultValue;
 }
 
-// ── Types for Care Partner Check-in data ──────────────────────────────────────
+// ── Types for Caregiver Check-In data ──────────────────────────────────────
 interface CheckInData {
   id: string;
   check_in_date: string;
@@ -1041,12 +1041,12 @@ useEffect(() => {
         )}
       </div>
 
-      {/* ── SECTION 3: Care Partner Progress Graphs ─────────────────────── */}
+      {/* ── SECTION 3: Caregiver Progress Graphs ─────────────────────── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-warm-bronze" />
-            <h2 className="text-lg font-bold text-charcoal">Care Partner Progress</h2>
+            <h2 className="text-lg font-bold text-charcoal">Caregiver Progress</h2>
           </div>
           <FilterButtons current={filterKey} onChange={setFilterKey} />
         </div>

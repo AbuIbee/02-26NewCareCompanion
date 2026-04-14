@@ -6,13 +6,16 @@ import { AdminCaregivers } from './AdminCaregivers';
 import { AdminPatients } from './AdminPatients';
 import { AdminAudit } from './AdminAudit';
 import { AdminPendingApprovals } from './AdminPendingApprovals';
+import PatientLayout from '@/pages/patient/PatientLayout';
+import CaregiverLayout from '@/pages/caregiver/CaregiverLayout';
+import TherapistLayout from '@/pages/therapist/TherapistLayout';
 import {
   LayoutDashboard, Users, UserCheck, FileText,
   Bell, LogOut, Heart, Clock, Stethoscope, ShieldCheck, Plus, Eye, EyeOff,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type AdminView = 'overview' | 'pending' | 'caregivers' | 'therapists' | 'admins' | 'patients' | 'audit';
+type AdminView = 'overview' | 'pending' | 'caregivers' | 'therapists' | 'admins' | 'patients' | 'audit' | 'portal_patient' | 'portal_coordinator' | 'portal_therapist' | 'portal_caregiver';
 
 // ── Role-filtered user list ───────────────────────────────────────────────────
 function UserDetailPanel({ user, onClose, onRefresh }: { user: any; onClose: () => void; onRefresh?: () => void }) {
@@ -491,8 +494,14 @@ export default function AdminLayout() {
     { id: 'therapists' as AdminView, label: 'Therapists',          icon: Stethoscope,     badge: 0 },
     { id: 'admins'     as AdminView, label: 'Admins',              icon: ShieldCheck,     badge: 0 },
     { id: 'patients'   as AdminView, label: 'All Patients',        icon: Users,           badge: 0 },
-    { id: 'audit'      as AdminView, label: 'Audit Log',           icon: FileText,        badge: 0 },
+    { id: 'audit'      as AdminView, label: 'Audit Log',           icon: FileText,        badge: 0 },,
+    { id: 'portal_patient'     as AdminView, label: 'View Patient Portal',             icon: Heart,       badge: 0, group: 'portals' },
+    { id: 'portal_coordinator' as AdminView, label: 'View Care Coordinator Portal',    icon: UserCheck,   badge: 0, group: 'portals' },
+    { id: 'portal_therapist'   as AdminView, label: 'View Therapist Portal',           icon: Stethoscope, badge: 0, group: 'portals' },
+    { id: 'portal_caregiver'   as AdminView, label: 'View Caregiver Portal',           icon: Users,       badge: 0, group: 'portals' },
   ];
+
+  const isPortalView = currentView.startsWith('portal_');
 
   const renderView = () => {
     switch (currentView) {
@@ -503,6 +512,10 @@ export default function AdminLayout() {
       case 'admins':     return <RoleUserList role="admin"     title="Admins" />;
       case 'patients':   return <AdminPatients />;
       case 'audit':      return <AdminAudit />;
+      case 'portal_patient':     return <PatientLayout />;
+      case 'portal_coordinator': return <CaregiverLayout />;
+      case 'portal_therapist':   return <TherapistLayout />;
+      case 'portal_caregiver':   return <CaregiverLayout />;
       default:           return <AdminDashboard onNavigate={(v) => setCurrentView(v as AdminView)} />;
     }
   };
@@ -552,14 +565,15 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => {
+        <nav className="p-3 flex-1 overflow-y-auto space-y-0.5">
+          <p className="text-[10px] font-bold text-medium-gray uppercase tracking-wider px-3 pt-1 pb-1.5">Admin Tools</p>
+          {navItems.filter(i => !i.id.startsWith('portal_')).map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             return (
               <button key={item.id}
                 onClick={() => { setCurrentView(item.id); if (item.id === 'pending') loadPendingCount(); }}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${isActive ? 'bg-warm-bronze text-white' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'}`}>
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? 'bg-warm-bronze text-white' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'}`}>
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
                 {item.badge > 0 && (
@@ -567,6 +581,22 @@ export default function AdminLayout() {
                     {item.badge}
                   </span>
                 )}
+              </button>
+            );
+          })}
+
+          <div className="border-t border-soft-taupe my-3" />
+          <p className="text-[10px] font-bold text-medium-gray uppercase tracking-wider px-3 pb-1.5">Portal Access</p>
+          {navItems.filter(i => i.id.startsWith('portal_')).map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.id;
+            return (
+              <button key={item.id}
+                onClick={() => setCurrentView(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? 'bg-deep-bronze text-white' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'}`}>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
+                {isActive && <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded font-bold">LIVE</span>}
               </button>
             );
           })}
@@ -583,18 +613,31 @@ export default function AdminLayout() {
 
       {/* Main */}
       <main className="ml-64 flex-1">
-        <header className="h-16 bg-white border-b border-soft-taupe flex items-center justify-between px-8 sticky top-0 z-30">
-          <h1 className="text-xl font-semibold text-charcoal">
-            {navItems.find(n => n.id === currentView)?.label}
-          </h1>
-          {pendingCount > 0 && currentView !== 'pending' && (
-            <button onClick={() => setCurrentView('pending')}
-              className="flex items-center gap-2 px-4 py-2 bg-gentle-coral/10 text-gentle-coral rounded-xl hover:bg-gentle-coral/20 transition-colors text-sm font-medium">
-              <Bell className="w-4 h-4" />{pendingCount} pending approval{pendingCount !== 1 ? 's' : ''}
+        {!isPortalView && (
+          <header className="h-16 bg-white border-b border-soft-taupe flex items-center justify-between px-8 sticky top-0 z-30">
+            <h1 className="text-xl font-semibold text-charcoal">
+              {navItems.find(n => n.id === currentView)?.label}
+            </h1>
+            {pendingCount > 0 && currentView !== 'pending' && (
+              <button onClick={() => setCurrentView('pending')}
+                className="flex items-center gap-2 px-4 py-2 bg-gentle-coral/10 text-gentle-coral rounded-xl hover:bg-gentle-coral/20 transition-colors text-sm font-medium">
+                <Bell className="w-4 h-4" />{pendingCount} pending approval{pendingCount !== 1 ? 's' : ''}
+              </button>
+            )}
+          </header>
+        )}
+        {isPortalView && (
+          <div className="h-10 bg-deep-bronze flex items-center justify-between px-6 sticky top-0 z-[999]">
+            <span className="text-white text-xs font-semibold">
+              👁 Admin Preview: {navItems.find(n => n.id === currentView)?.label}
+            </span>
+            <button onClick={() => setCurrentView('overview')}
+              className="text-white/80 hover:text-white text-xs font-medium underline">
+              ← Exit Preview
             </button>
-          )}
-        </header>
-        <div className="p-8">
+          </div>
+        )}
+        <div className={isPortalView ? '' : 'p-8'}>
           <AnimatePresence mode="wait">
             <motion.div key={currentView} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>

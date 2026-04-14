@@ -460,7 +460,7 @@ export default function PatientProgressTimeline() {
               <svg className="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 12l3-3 3 3 4-4" />
               </svg>
-              Care Partner Progress
+              Caregiver Progress
             </h1>
             <p className="text-white/80 text-sm mt-0.5">
               Track progress over time from daily care partner check-ins
@@ -532,7 +532,7 @@ export default function PatientProgressTimeline() {
           </div>
           <p className="font-semibold text-charcoal text-sm">No check-ins recorded in this period</p>
           <p className="text-xs text-medium-gray mt-1 max-w-xs mx-auto">
-            When a Care Partner submits daily check-ins, progress graphs will appear here.
+            When a Caregiver submits daily check-ins, progress graphs will appear here.
           </p>
         </div>
       )}

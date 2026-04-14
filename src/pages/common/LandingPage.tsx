@@ -351,7 +351,7 @@ export default function LandingPage() {
                             { icon: Bell,          title: 'Reminders',      color: 'bg-amber-100 text-amber-700',
                               why: 'Memory impairment makes self-managing a daily routine nearly impossible. Reminders serve as a gentle, non-judgmental external memory — reducing patient frustration and caregiver burden.',
                               what: 'Scheduled alerts for daily tasks, appointments, medications, and activities.' },
-                            { icon: ClipboardList, title: 'Care Partner',   color: 'bg-soft-sage/20 text-green-700',
+                            { icon: ClipboardList, title: 'Caregiver',   color: 'bg-soft-sage/20 text-green-700',
                               why: 'Patients benefit greatly from knowing exactly who is looking after them. Reduces anxiety by giving direct access to contact their care partner and feel less alone.',
                               what: 'Direct connection to the primary caregiver — contact info, check-in history, and care partner notes.' },
                             { icon: UserCheck,     title: 'My Care Team',   color: 'bg-warm-bronze/10 text-warm-bronze',
@@ -401,7 +401,7 @@ export default function LandingPage() {
                         <div className="grid sm:grid-cols-2 gap-4">
                           {[
                             { icon: Home,          title: 'Dashboard',        color: 'bg-warm-bronze/10 text-warm-bronze',
-                              what: 'Real-time snapshot of patient\'s daily status — tasks, medications, mood, sleep, upcoming appointments, Care Partner check-ins, and Quick Actions.',
+                              what: 'Real-time snapshot of patient\'s daily status — tasks, medications, mood, sleep, upcoming appointments, Caregiver check-ins, and Quick Actions.',
                               why: 'Caregivers can\'t be physically present 24/7. This gives an at-a-glance health summary the moment they log in, enabling faster response to issues without making phone calls.' },
                             { icon: Pill,          title: 'Medications',      color: 'bg-calm-blue/10 text-blue-700',
                               what: 'Complete medication management hub — prescriptions, dosages, schedules, and adherence tracking with percentage monitoring.',
@@ -476,8 +476,8 @@ export default function LandingPage() {
                             { icon: Film,        title: 'Videos & Media',       color: 'bg-amber-100 text-amber-700',
                               what: 'Media management for uploading and assigning therapeutic content — guided relaxation, cognitive stimulation videos, music therapy playlists, and caregiver training materials.',
                               why: 'Music and reminiscence video therapy are among the most effective non-pharmacological interventions for dementia. Media can also train caregivers on communication and de-escalation techniques.' },
-                            { icon: ClipboardList, title: 'Care Partner Reports', color: 'bg-soft-sage/20 text-green-700',
-                              what: 'Live feed of Care Partner daily check-in reports — 7 clinical sections covering ADLs, nutrition, continence, safety events, behaviour, mood, and symptoms.',
+                            { icon: ClipboardList, title: 'Caregiver Reports', color: 'bg-soft-sage/20 text-green-700',
+                              what: 'Live feed of Caregiver daily check-in reports — 7 clinical sections covering ADLs, nutrition, continence, safety events, behaviour, mood, and symptoms.',
                               why: 'Gives the therapist daily clinical-grade observations from the home environment — the most valuable data point in community-based dementia care, normally unavailable outside a facility.' },
                           ].map(({ icon: Icon, title, color, what, why }) => (
                             <div key={title} className="bg-soft-taupe/10 rounded-2xl p-5 space-y-2 border border-soft-taupe/50">

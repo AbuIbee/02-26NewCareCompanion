@@ -210,7 +210,7 @@ function HistoryRow({ row }: { row: any }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function CarePartnerCheckin() {
+export default function CaregiverCheckin() {
   const { state } = useApp();
   const [data, setData]         = useState<CheckInData>({ ...EMPTY });
   const [view, setView]         = useState<'form' | 'history'>('form');
@@ -284,7 +284,7 @@ export default function CarePartnerCheckin() {
         ...data,
       });
       if (error) throw error;
-      toast.success('Care Partner report submitted! Your caregiver and therapist can now view it.');
+      toast.success('Caregiver report submitted! Your caregiver and therapist can now view it.');
       setData({ ...EMPTY });
       setOpenSections({ A: true, B: false, C: false, D: false, E: false, F: false, G: false, H: false });
     } catch (err: any) {
@@ -300,7 +300,7 @@ export default function CarePartnerCheckin() {
       <div className="bg-warm-bronze rounded-2xl p-6 text-white">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Care Partner</h1>
+            <h1 className="text-2xl font-bold">Caregiver</h1>
             <p className="text-white mt-1 text-sm">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </p>

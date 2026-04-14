@@ -1,5 +1,5 @@
 import { useApp } from '@/store/AppContext';
-import CarePartnerCheckinSummary from '@/pages/caregiver/CarePartnerCheckinSummary';
+import CaregiverCheckinSummary from '@/pages/caregiver/CaregiverCheckinSummary';
 import { useSelectedPatient } from '@/hooks/useSelectedPatient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -107,9 +107,9 @@ export default function TherapistDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Care Partner Check-In Summary */}
+      {/* Caregiver Check-In Summary */}
       {selectedPatient && (
-        <CarePartnerCheckinSummary
+        <CaregiverCheckinSummary
           patientId={selectedPatient.patient.id}
           patientName={`${selectedPatient.patient.firstName} ${selectedPatient.patient.lastName}`}
         />

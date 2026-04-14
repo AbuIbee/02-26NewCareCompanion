@@ -359,13 +359,13 @@ export default function PatientProfileSetup() {
               <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <User className="w-5 h-5 text-warm-bronze" /> My Care Partner
+                    <User className="w-5 h-5 text-warm-bronze" /> My Caregiver
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="caregiverName">Care Partner's Name</Label>
+                      <Label htmlFor="caregiverName">Caregiver's Name</Label>
                       <Input id="caregiverName" value={form.caregiverName} onChange={f('caregiverName')} placeholder="Their name" />
                     </div>
                     <div className="space-y-1.5">
@@ -374,7 +374,7 @@ export default function PatientProfileSetup() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="caregiverPhone">Care Partner's Phone</Label>
+                    <Label htmlFor="caregiverPhone">Caregiver's Phone</Label>
                     <Input id="caregiverPhone" type="tel" value={form.caregiverPhone} onChange={f('caregiverPhone')} placeholder="(555) 123-4567" />
                   </div>
                 </CardContent>

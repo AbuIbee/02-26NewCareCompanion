@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { supabase } from "@/lib/supabase";
 
-type CarePartnerCheckinRow = {
+type CaregiverCheckinRow = {
   id: string;
   patient_id: string;
   check_in_date: string;
@@ -63,7 +63,7 @@ const SCORE_MAPS: Record<string, Record<string, number>> = {
   sy_severity: { Mild: 2, Moderate: 4, Severe: 5 },
 };
 
-function scoreMetric(row: CarePartnerCheckinRow, key: string): number | null {
+function scoreMetric(row: CaregiverCheckinRow, key: string): number | null {
   if (key === "be_behaviors") {
     const arr: string[] = row.be_behaviors || [];
     const filtered = arr.filter((x) => x !== "None observed");
@@ -99,7 +99,7 @@ export default function ADLProgressChart({
   metrics,
   days = 30,
 }: Props) {
-  const [rows, setRows] = useState<CarePartnerCheckinRow[]>([]);
+  const [rows, setRows] = useState<CaregiverCheckinRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -140,7 +140,7 @@ export default function ADLProgressChart({
         return;
       }
 
-      setRows((data ?? []) as CarePartnerCheckinRow[]);
+      setRows((data ?? []) as CaregiverCheckinRow[]);
       setLoading(false);
     }
 

@@ -512,7 +512,7 @@ export default function PatientReminders() {
           <div>
             <h4 className="font-semibold text-charcoal mb-1">How Reminders Work</h4>
             <p className="text-sm text-medium-gray">
-              You and your Care Partner will set up reminders to help remember important things. You'll see notifications at the scheduled times.
+              You and your Caregiver will set up reminders to help remember important things. You'll see notifications at the scheduled times.
             </p>
           </div>
         </div>

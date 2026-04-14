@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '@/store/AppContext';
-import CarePartnerCheckinSummary from '@/pages/caregiver/CarePartnerCheckinSummary';
+import CaregiverCheckinSummary from '@/pages/caregiver/CaregiverCheckinSummary';
 import AssignTherapistModal from './AssignTherapistModal';
 import { useSelectedPatient } from '@/hooks/useSelectedPatient';
 import { Card, CardContent } from '@/components/ui/card';
@@ -358,15 +358,15 @@ export default function CaregiverDashboard() {
         </motion.div>
       </div>
 
-      {/* Care Partner Check-In Summary */}
+      {/* Caregiver Check-In Summary */}
       {patient && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.45 }}
         >
-          <h3 className="text-lg font-semibold text-charcoal mb-3">Care Partner Check-In</h3>
-          <CarePartnerCheckinSummary
+          <h3 className="text-lg font-semibold text-charcoal mb-3">Caregiver Check-In</h3>
+          <CaregiverCheckinSummary
             patientId={patient.id}
             patientName={`${patient.firstName} ${patient.lastName}`}
           />

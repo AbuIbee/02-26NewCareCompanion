@@ -12,7 +12,7 @@ import { useTempUser } from '@/components/TempUserGuard';
 import { isTempUser } from '@/types/subscription';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface CarePartnerInfo {
+interface CaregiverInfo {
   full_name:           string;
   email:               string;
   phone:               string;
@@ -33,7 +33,7 @@ interface EmergencyContact {
   notes:        string;
 }
 
-const EMPTY_CARE_PARTNER: CarePartnerInfo = {
+const EMPTY_CAREGIVER: CaregiverInfo = {
   full_name: '', email: '', phone: '', relationship: '',
   education_level: '', medical_experience: '', employment_relevant: '', notes: '',
 };
@@ -67,8 +67,8 @@ export default function PatientEmergencyContacts() {
   const patientId = state.currentUser?.id;
   const { blockIfReadOnly } = useTempUser();
 
-  // Care Partner state
-  const [cpInfo,       setCpInfo]       = useState<CarePartnerInfo>(EMPTY_CARE_PARTNER);
+  // Caregiver state
+  const [cpInfo,       setCpInfo]       = useState<CaregiverInfo>(EMPTY_CAREGIVER);
   const [cpSaving,     setCpSaving]     = useState(false);
   const [cpLoaded,     setCpLoaded]     = useState(false);
   const [cpExpanded,   setCpExpanded]   = useState(true);
@@ -83,11 +83,11 @@ export default function PatientEmergencyContacts() {
   // ── Load on mount ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!patientId) return;
-    loadCarePartner();
+    loadCaregiver();
     loadEmergencyContacts();
   }, [patientId]);
 
-  const loadCarePartner = async () => {
+  const loadCaregiver = async () => {
     try {
       const { data } = await supabase
         .from('patient_care_partners')
@@ -139,8 +139,8 @@ export default function PatientEmergencyContacts() {
     }
   };
 
-  // ── Save Care Partner ─────────────────────────────────────────────────────
-  const saveCarePartner = async () => {
+  // ── Save Caregiver ─────────────────────────────────────────────────────
+  const saveCaregiver = async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (blockIfReadOnly() || isTempUser(authUser?.email)) return;
     if (!cpInfo.full_name.trim()) { toast.error('Care partner name is required'); return; }
@@ -239,7 +239,7 @@ export default function PatientEmergencyContacts() {
 
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-charcoal">Emergency Contact & Care Partner</h1>
+        <h1 className="text-2xl font-bold text-charcoal">Emergency Contact & Caregiver</h1>
         <p className="text-medium-gray text-sm mt-1">
           Your care partner and emergency contacts — updated and ready when needed.
         </p>
@@ -394,7 +394,7 @@ export default function PatientEmergencyContacts() {
               <Heart className="w-5 h-5 text-warm-bronze" />
             </div>
             <div className="text-left">
-              <p className="font-semibold text-charcoal">Care Partner</p>
+              <p className="font-semibold text-charcoal">Caregiver</p>
               <p className="text-xs text-medium-gray mt-0.5">
                 {cpInfo.full_name || 'Not yet filled in'} {cpInfo.relationship ? `· ${cpInfo.relationship}` : ''}
               </p>
@@ -471,10 +471,10 @@ export default function PatientEmergencyContacts() {
                     </Field>
                   </div>
 
-                  <button onClick={saveCarePartner} disabled={cpSaving}
+                  <button onClick={saveCaregiver} disabled={cpSaving}
                     className="flex items-center gap-2 px-5 py-2.5 bg-warm-bronze hover:bg-deep-bronze text-white rounded-xl text-sm font-semibold disabled:opacity-60 transition-colors">
                     {cpSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    {cpSaving ? 'Saving...' : 'Save Care Partner Info'}
+                    {cpSaving ? 'Saving...' : 'Save Caregiver Info'}
                   </button>
                 </div>
               )}

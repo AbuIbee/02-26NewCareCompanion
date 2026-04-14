@@ -8,7 +8,7 @@ import PatientMedications from './PatientMedications';
 import PatientDocuments from './PatientDocuments';
 import PatientReminders from './PatientReminders';
 import PatientMoodTracker from './PatientMoodTracker';
-import CarePartnerCheckin from './CarePartnerCheckin';
+import CaregiverCheckin from './CaregiverCheckin';
 import PatientProfileSetup from './PatientProfileSetup';
 import PatientEmergencyContacts from './PatientEmergencyContacts';
 import PatientGames from './PatientGames';
@@ -281,7 +281,7 @@ export default function PatientLayout() {
   ];
 
   const moreNavItems = [
-    { id: 'checkin'   as PatientView, label: 'Care Partner', icon: ClipboardList },
+    { id: 'checkin'   as PatientView, label: 'Caregiver', icon: ClipboardList },
     { id: 'documents' as PatientView, label: 'Papers',       icon: FileText },
   ];
 
@@ -311,7 +311,7 @@ const renderView = () => {
       return <PatientReminders />;
 
     case 'checkin':
-      return <CarePartnerCheckin />;
+      return <CaregiverCheckin />;
 
     case 'intake':
       return <PatientIntakeForm onCompleted={() => setIntakeCompleted(true)} />;
