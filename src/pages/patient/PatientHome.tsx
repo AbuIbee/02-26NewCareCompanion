@@ -206,6 +206,7 @@ export default function PatientHome({ onNavigateToGame }: { onNavigateToGame?: (
   const totalMedsToday = localTotal > 0 ? localTotal : medications.length;
 
   const [weather, setWeather] = useState<WeatherData>(getFallbackWeather());
+  const [locationName, setLocationName] = useState<string>(patient?.location || '');
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -214,6 +215,22 @@ export default function PatientHome({ onNavigateToGame }: { onNavigateToGame?: (
         try {
           const w = await fetchWeather(coords.latitude, coords.longitude);
           setWeather(w);
+          // Reverse-geocode to get city name
+          try {
+            const geoRes = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json`
+            );
+            const geoJson = await geoRes.json();
+            const city =
+              geoJson.address?.city ||
+              geoJson.address?.town ||
+              geoJson.address?.village ||
+              geoJson.address?.county ||
+              '';
+            if (city) setLocationName(city);
+          } catch {
+            // keep patient location fallback
+          }
         } catch {
           // keep fallback
         }
@@ -383,10 +400,10 @@ export default function PatientHome({ onNavigateToGame }: { onNavigateToGame?: (
                   <div className="flex items-center gap-3 text-charcoal">
                     <WeatherIcon condition={weather.condition} className="w-6 h-6" />
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-charcoal leading-none">
-                        {weather.temp}°
+                      <div className="text-base font-semibold text-charcoal leading-snug">
+                        It's {weather.temp}°{locationName ? ` in ${locationName}` : ''} today
                       </div>
-                      <div className="mt-1 text-sm font-medium text-charcoal/85 leading-snug">
+                      <div className="mt-0.5 text-sm font-medium text-charcoal/85 leading-snug">
                         {weather.message}
                       </div>
                     </div>

@@ -5,7 +5,7 @@ import {
   ClipboardList, ChevronDown, ChevronUp, CheckCircle2,
   AlertCircle, Save, Loader2, History, Calendar,
   User, Heart, Activity, Shield, Brain, Droplets,
-  Utensils, Moon, ThumbsUp, ChevronRight,
+  Utensils, Moon, ThumbsUp, ChevronRight, MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -30,6 +30,9 @@ interface CheckInData {
   mo_mood: string; mo_social: string; mo_sleep: string; mo_comments: string;
   // G - Symptoms
   sy_symptoms: string[]; sy_severity: string; sy_other: string; sy_comments: string;
+  // H - Communication & Cognition
+  cc_speech: string; cc_comprehension: string; cc_attention: string;
+  cc_following_directions: string; cc_word_finding: string; cc_comments: string;
 }
 
 const EMPTY: CheckInData = {
@@ -42,6 +45,8 @@ const EMPTY: CheckInData = {
   be_behaviors: [], be_trigger: '', be_comments: '',
   mo_mood: '', mo_social: '', mo_sleep: '', mo_comments: '',
   sy_symptoms: [], sy_severity: '', sy_other: '', sy_comments: '',
+  cc_speech: '', cc_comprehension: '', cc_attention: '',
+  cc_following_directions: '', cc_word_finding: '', cc_comments: '',
 };
 
 // ─── Option helpers ───────────────────────────────────────────────────────────
@@ -213,7 +218,7 @@ export default function CarePartnerCheckin() {
   const [history, setHistory]   = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [openSections, setOpenSections]     = useState<Record<string, boolean>>({
-    A: true, B: false, C: false, D: false, E: false, F: false, G: false,
+    A: true, B: false, C: false, D: false, E: false, F: false, G: false, H: false,
   });
 
   const patientId = state.currentUser?.id;
@@ -256,6 +261,7 @@ export default function CarePartnerCheckin() {
     E: data.be_behaviors.length > 0,
     F: !!(data.mo_mood || data.mo_sleep),
     G: data.sy_symptoms.length > 0 || !!data.sy_other,
+    H: !!(data.cc_speech || data.cc_attention || data.cc_following_directions),
   };
 
   const completedCount = Object.values(sectionComplete).filter(Boolean).length;
@@ -280,7 +286,7 @@ export default function CarePartnerCheckin() {
       if (error) throw error;
       toast.success('Care Partner report submitted! Your caregiver and therapist can now view it.');
       setData({ ...EMPTY });
-      setOpenSections({ A: true, B: false, C: false, D: false, E: false, F: false, G: false });
+      setOpenSections({ A: true, B: false, C: false, D: false, E: false, F: false, G: false, H: false });
     } catch (err: any) {
       toast.error('Failed to submit: ' + err.message);
     } finally {
@@ -291,28 +297,28 @@ export default function CarePartnerCheckin() {
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       {/* Header */}
-      <div className="bg-gradient-to-r from-warm-bronze to-warm-bronze/80 rounded-2xl p-6 text-white">
+      <div className="bg-warm-bronze rounded-2xl p-6 text-white">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold">Care Partner</h1>
-            <p className="text-white/80 mt-1 text-sm">
+            <p className="text-white mt-1 text-sm">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
-            <p className="text-white/70 text-xs mt-1">
+            <p className="text-white/90 text-xs mt-1">
               Your observations help the care team provide better support
             </p>
           </div>
           <div className="text-right flex-shrink-0">
-            <p className="text-3xl font-bold">{completedCount}/7</p>
-            <p className="text-white/70 text-xs">sections filled</p>
+            <p className="text-3xl font-bold">{completedCount}/8</p>
+            <p className="text-white/90 text-xs">sections filled</p>
           </div>
         </div>
         {/* Progress bar */}
-        <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
+        <div className="mt-4 h-2 bg-white/30 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-white rounded-full"
             initial={{ width: 0 }}
-            animate={{ width: `${(completedCount / 7) * 100}%` }}
+            animate={{ width: `${(completedCount / 8) * 100}%` }}
             transition={{ duration: 0.4 }}
           />
         </div>
@@ -519,14 +525,65 @@ export default function CarePartnerCheckin() {
             <CommentBox value={data.sy_comments} onChange={set('sy_comments')} />
           </Section>
 
+          {/* H — Communication & Cognition */}
+          <Section id="H" title="H — Communication & Cognition" icon={MessageSquare}
+            color="bg-calm-blue/10 text-calm-blue"
+            open={openSections.H} onToggle={() => toggleSection('H')}
+            completed={sectionComplete.H}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Select label="Speech Clarity" value={data.cc_speech} onChange={set('cc_speech')}
+                options={[
+                  'Clear and normal',
+                  'Slightly slurred / slow',
+                  'Difficult to understand',
+                  'Mostly non-verbal',
+                  'Non-verbal / mute',
+                  'Unknown',
+                ]} />
+              <Select label="Word Finding" value={data.cc_word_finding} onChange={set('cc_word_finding')}
+                options={[
+                  'No difficulty',
+                  'Occasional difficulty',
+                  'Frequent pauses / substitutions',
+                  'Unable to find words',
+                  'Unknown',
+                ]} />
+              <Select label="Understanding Spoken Language" value={data.cc_comprehension} onChange={set('cc_comprehension')}
+                options={[
+                  'Understands normally',
+                  'Understands simple sentences',
+                  'Understands single words only',
+                  'Minimal comprehension',
+                  'Unknown',
+                ]} />
+              <Select label="Following Simple Directions" value={data.cc_following_directions} onChange={set('cc_following_directions')}
+                options={[
+                  'Follows without difficulty',
+                  'Needs repetition / cues',
+                  'Follows with step-by-step guidance',
+                  'Unable to follow directions',
+                  'Unknown',
+                ]} />
+              <Select label="Attention & Focus" value={data.cc_attention} onChange={set('cc_attention')}
+                options={[
+                  'Attentive and focused',
+                  'Mildly distracted',
+                  'Significantly distracted',
+                  'Unable to sustain attention',
+                  'Unknown',
+                ]} />
+            </div>
+            <CommentBox value={data.cc_comments} onChange={set('cc_comments')} />
+          </Section>
+
           {/* Submit */}
           <div className="bg-white rounded-2xl border border-soft-taupe p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="font-semibold text-charcoal">Ready to submit?</p>
-                <p className="text-sm text-medium-gray">{completedCount} of 7 sections completed</p>
+                <p className="text-sm text-medium-gray">{completedCount} of 8 sections completed</p>
               </div>
-              {completedCount === 7 && (
+              {completedCount === 8 && (
                 <span className="flex items-center gap-1 text-green-700 text-sm font-medium">
                   <CheckCircle2 className="w-4 h-4" />All sections complete
                 </span>
