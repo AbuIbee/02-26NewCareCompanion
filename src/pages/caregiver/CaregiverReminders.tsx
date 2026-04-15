@@ -12,7 +12,7 @@ import { Plus, Bell, Clock, Pill, Calendar, Check, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-export default function CaregiverReminders() {
+export default function PatientCareCoordinatorReminders() {
   const { state } = useApp();
   const selectedPatient = useSelectedPatient();
   const reminders = selectedPatient?.reminders || state.reminders;

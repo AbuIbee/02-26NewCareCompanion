@@ -12,7 +12,7 @@ import { Plus, Target, CheckCircle2, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-export default function CaregiverGoals() {
+export default function PatientCareCoordinatorGoals() {
   const { state } = useApp();
   const goals = state.goals;
   const [showAddDialog, setShowAddDialog] = useState(false);

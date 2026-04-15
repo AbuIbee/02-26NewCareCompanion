@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-export default function CaregiverWellness() {
+export default function PatientCareCoordinatorWellness() {
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [stressLevel, setStressLevel] = useState(5);
   const [notes, setNotes] = useState('');
@@ -55,7 +55,7 @@ export default function CaregiverWellness() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h2 className="text-2xl font-bold text-charcoal mb-1">Caregiver Wellness</h2>
+        <h2 className="text-2xl font-bold text-charcoal mb-1">Patient Care Coordinator Wellness</h2>
         <p className="text-medium-gray">Your wellbeing matters too</p>
       </motion.div>
 
@@ -146,7 +146,7 @@ export default function CaregiverWellness() {
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center justify-between p-3 bg-soft-taupe/30 rounded-xl">
               <div>
-                <p className="font-medium text-charcoal">Caregiver Support Group</p>
+                <p className="font-medium text-charcoal">Patient Care Coordinator Support Group</p>
                 <p className="text-sm text-medium-gray">Every Tuesday at 6 PM</p>
               </div>
               <Button variant="outline" size="sm" className="border-warm-bronze text-warm-bronze">
@@ -164,7 +164,7 @@ export default function CaregiverWellness() {
             </div>
             <div className="flex items-center justify-between p-3 bg-soft-taupe/30 rounded-xl">
               <div>
-                <p className="font-medium text-charcoal">24/7 Caregiver Helpline</p>
+                <p className="font-medium text-charcoal">24/7 Patient Care Coordinator Helpline</p>
                 <p className="text-sm text-medium-gray">1-800-CAREGIVER</p>
               </div>
               <Button variant="outline" size="sm" className="border-warm-bronze text-warm-bronze">

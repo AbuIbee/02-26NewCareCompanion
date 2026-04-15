@@ -284,7 +284,7 @@ export default function CaregiverCheckin() {
         ...data,
       });
       if (error) throw error;
-      toast.success('Caregiver report submitted! Your caregiver and therapist can now view it.');
+      toast.success('Caregiver report submitted! Your patient care coordinator and therapist can now view it.');
       setData({ ...EMPTY });
       setOpenSections({ A: true, B: false, C: false, D: false, E: false, F: false, G: false, H: false });
     } catch (err: any) {

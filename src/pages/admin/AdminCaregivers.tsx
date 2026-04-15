@@ -8,7 +8,7 @@ import {
 import { toast } from 'sonner';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Role = 'caregiver' | 'therapist' | 'patient' | 'admin' | 'pending';
+type Role = 'patient_care_coordinator' | 'therapist' | 'patient' | 'admin' | 'pending';
 
 interface UserProfile {
   id: string;
@@ -41,7 +41,7 @@ interface FormErrors {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ROLES: { value: Role; label: string; color: string }[] = [
-  { value: 'caregiver', label: 'Caregiver', color: 'bg-warm-bronze/10 text-warm-bronze'  },
+  { value: 'caregiver', label: 'Patient Care Coordinator', color: 'bg-warm-bronze/10 text-warm-bronze'  },
   { value: 'therapist', label: 'Therapist', color: 'bg-calm-blue/10 text-blue-700'       },
   { value: 'patient',   label: 'Patient',   color: 'bg-soft-sage/20 text-green-700'      },
   { value: 'admin',     label: 'Admin',     color: 'bg-deep-bronze/10 text-deep-bronze'  },
@@ -57,7 +57,7 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]
 
 // ─── Add User Modal ───────────────────────────────────────────────────────────
 function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
-  const [form, setForm]     = useState<NewUserForm>({ firstName: '', lastName: '', email: '', phone: '', password: '', role: 'caregiver', organization: '' });
+  const [form, setForm]     = useState<NewUserForm>({ firstName: '', lastName: '', email: '', phone: '', password: '', role: 'patient_care_coordinator', organization: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPass, setShowPass] = useState(false);
   const [saving, setSaving]     = useState(false);
@@ -207,7 +207,7 @@ function AddUserModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export function AdminCaregivers() {
+export function AdminPatientCareCoordinators() {
   const [users,        setUsers]        = useState<UserProfile[]>([]);
   const [loading,      setLoading]      = useState(true);
   const [searchTerm,   setSearchTerm]   = useState('');
@@ -242,7 +242,7 @@ export function AdminCaregivers() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // Only load caregivers - other roles have their own tabs
+      // Only load patient care coordinators - other roles have their own tabs
       const { data, error } = await supabase
         .from('profiles')
         .select('id, email, first_name, last_name, role, phone, created_at')
@@ -423,7 +423,7 @@ export function AdminCaregivers() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-charcoal">Manage Caregivers</h2>
+          <h2 className="text-2xl font-bold text-charcoal">Manage Patient Care Coordinators</h2>
           <p className="text-medium-gray mt-1 text-sm">
             Edit any field inline and click <strong>Save</strong>. Changes sync to Supabase and Auth automatically.
           </p>
@@ -455,7 +455,7 @@ export function AdminCaregivers() {
       {pendingUsers.length > 0 && (
         <UserTable data={pendingUsers} title={`⏳ Pending Approval (${pendingUsers.length})`} emptyMsg="No pending users" />
       )}
-      <UserTable data={activeUsers} title={`All Caregivers (${activeUsers.length})`} emptyMsg="No users found" />
+      <UserTable data={activeUsers} title={`All Patient Care Coordinators (${activeUsers.length})`} emptyMsg="No users found" />
 
       {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} onAdded={loadUsers} />}
     </div>

@@ -3,7 +3,7 @@ import LandingPage from '@/pages/common/LandingPage';
 import LoginPage from '@/pages/common/LoginPage';
 import ResetPasswordPage from '@/pages/common/ResetPasswordPage';
 import PatientLayout from '@/pages/patient/PatientLayout';
-import CaregiverLayout from '@/pages/caregiver/CaregiverLayout';
+import PatientCareCoordinatorLayout from '@/pages/caregiver/PatientCareCoordinatorLayout';
 import TherapistLayout from '@/pages/therapist/TherapistLayout';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import SuperAdminLayout from '@/pages/admin/SuperAdminLayout';
@@ -217,9 +217,9 @@ function AppContent() {
       case 'patient':    
         console.log('🎬 [App] Rendering PatientLayout'); 
         return <PatientLayout />;
-      case 'caregiver':  
-        console.log('🎬 [App] Rendering CaregiverLayout'); 
-        return <CaregiverLayout />;
+      case 'patient_care_coordinator':  
+        console.log('🎬 [App] Rendering PatientCareCoordinatorLayout'); 
+        return <PatientCareCoordinatorLayout />;
       case 'therapist':  
         console.log('🎬 [App] Rendering TherapistLayout'); 
         return <TherapistLayout />;

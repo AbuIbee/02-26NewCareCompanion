@@ -101,7 +101,7 @@ export function AdminPatients() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-charcoal">All Patients (System Wide)</h2>
-        <p className="text-medium-gray text-sm mt-1">{patients.length} total patients across all caregivers</p>
+        <p className="text-medium-gray text-sm mt-1">{patients.length} total patients across all patient care coordinators</p>
       </div>
 
       <div className="relative">
@@ -116,14 +116,14 @@ export function AdminPatients() {
           <div className="text-center py-12 text-medium-gray">
             <User className="w-12 h-12 mx-auto mb-3 text-soft-taupe" />
             <p className="font-medium">No patients found</p>
-            <p className="text-sm mt-1">Patients are created by caregivers through the Add Patient form</p>
+            <p className="text-sm mt-1">Patients are created by patient care coordinators through the Add Patient form</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-soft-taupe/20">
                 <tr>
-                  {['Patient', 'Email', 'Assigned Caregiver', 'Assigned Therapist', 'Created'].map(h => (
+                  {['Patient', 'Email', 'Assigned Patient Care Coordinator', 'Assigned Therapist', 'Created'].map(h => (
                     <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-medium-gray uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>

@@ -9,7 +9,7 @@ const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pro
  */
 export async function createPatientIntake(
   formData: PatientIntakeFormData,
-  caregiverId: string
+  patientCareCoordinatorId: string
 ): Promise<{ intakeId: string; error: Error | null }> {
   const { data, error } = await supabase
     .from('patient_intake')
@@ -37,7 +37,7 @@ export async function createPatientIntake(
       doctor_therapist_name: formData.doctorTherapistName || null,
       doctor_therapist_phone: formData.doctorTherapistPhone || null,
 
-      // Caregiver information (snapshot)
+      // Patient Care Coordinator information (snapshot)
       caregiver_name: formData.caregiverName || null,
       caregiver_relationship: formData.caregiverRelationship || null,
       caregiver_phone: formData.caregiverPhone || null,
@@ -122,7 +122,7 @@ export async function provisionPatient(
  */
 export async function createAndProvisionPatient(
   formData: PatientIntakeFormData,
-  caregiverId: string
+  patientCareCoordinatorId: string
 ): Promise<{ patientProfileId: string; intakeId: string; error: Error | null }> {
   // Step 1: Create intake
   const { intakeId, error: intakeError } = await createPatientIntake(formData, caregiverId);
@@ -185,9 +185,9 @@ export async function getPatientIntakeByProfileId(patientProfileId: string): Pro
 }
 
 /**
- * Get all intakes for a caregiver
+ * Get all intakes for a patient care coordinator
  */
-export async function getCaregiverIntakes(caregiverId: string): Promise<PatientIntake[]> {
+export async function getCaregiverIntakes(patientCareCoordinatorId: string): Promise<PatientIntake[]> {
   const { data, error } = await supabase
     .from('patient_intake')
     .select('*')
@@ -195,7 +195,7 @@ export async function getCaregiverIntakes(caregiverId: string): Promise<PatientI
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching caregiver intakes:', error);
+    console.error('Error fetching patient care coordinator intakes:', error);
     return [];
   }
 
@@ -294,10 +294,10 @@ function transformDbToPatientIntake(data: any): PatientIntake {
     doctorTherapistName: data.doctor_therapist_name,
     doctorTherapistPhone: data.doctor_therapist_phone,
     
-    // Caregiver information
-    caregiverName: data.caregiver_name,
+    // Patient Care Coordinator information
+    patientCareCoordinatorName: data.caregiver_name,
     caregiverRelationship: data.caregiver_relationship,
-    caregiverPhone: data.caregiver_phone,
+    patientCareCoordinatorPhone: data.caregiver_phone,
     
     // Medications
     medicationsAndDosage: data.medications_and_dosage,

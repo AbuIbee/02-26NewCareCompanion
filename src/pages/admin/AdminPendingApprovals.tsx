@@ -11,7 +11,7 @@ interface PendingUser {
   requested_role?: string; // role they signed up as, stored in auth metadata
 }
 
-type ApproveRole = 'caregiver' | 'therapist' | 'patient';
+type ApproveRole = 'patient_care_coordinator' | 'therapist' | 'patient';
 
 interface AdminPendingApprovalsProps {
   onCountChange: (count: number) => void;
@@ -54,7 +54,7 @@ export function AdminPendingApprovals({ onCountChange }: AdminPendingApprovalsPr
   };
 
   const handleApprove = async (user: PendingUser) => {
-    const approvedRole = selectedRoles[user.id] || 'caregiver';
+    const approvedRole = selectedRoles[user.id] || 'patient_care_coordinator';
     setProcessingId(user.id);
     try {
       // 1 — Update their role in profiles
@@ -178,12 +178,12 @@ export function AdminPendingApprovals({ onCountChange }: AdminPendingApprovalsPr
                   <div className="space-y-1">
                     <label className="text-xs text-medium-gray font-medium">Approve as:</label>
                     <select
-                      value={selectedRoles[user.id] || 'caregiver'}
+                      value={selectedRoles[user.id] || 'patient_care_coordinator'}
                       onChange={e => setSelectedRoles(prev => ({ ...prev, [user.id]: e.target.value as ApproveRole }))}
                       disabled={processingId === user.id}
                       className="px-3 py-2 border border-soft-taupe rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-warm-bronze bg-white"
                     >
-                      <option value="caregiver">Caregiver</option>
+                      <option value="caregiver">Patient Care Coordinator</option>
                       <option value="therapist">Therapist</option>
                       <option value="patient">Patient</option>
                     </select>

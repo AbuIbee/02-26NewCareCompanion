@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type UserRole = 'admin' | 'therapist' | 'caregiver' | 'patient'
+export type UserRole = 'admin' | 'therapist' | 'patient_care_coordinator' | 'patient'
 
 export type DementiaStage = 'early' | 'middle' | 'late'
 
@@ -510,7 +510,7 @@ export interface Database {
           is_active: boolean
           related_first_name: string
           related_last_name: string
-          related_type: 'patient' | 'caregiver'
+          related_type: 'patient' | 'patient_care_coordinator'
         }
       }
     }

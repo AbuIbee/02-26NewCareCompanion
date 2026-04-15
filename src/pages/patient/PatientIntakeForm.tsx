@@ -26,8 +26,8 @@ interface IntakeForm {
   dementiaStage: string; diagnosisDate: string;
   // Doctor / Hospital
   doctorName: string; doctorPhone: string; preferredHospital: string;
-  // Caregiver
-  caregiverName: string; caregiverRelationship: string; caregiverPhone: string;
+  // Patient Care Coordinator
+  patientCareCoordinatorName: string; caregiverRelationship: string; patientCareCoordinatorPhone: string;
   // Medications
   medications: string;
   // Closest Relative Contact
@@ -40,7 +40,7 @@ const EMPTY: IntakeForm = {
   streetAddress: '', city: '', state: '', zipCode: '',
   dementiaStage: '', diagnosisDate: '',
   doctorName: '', doctorPhone: '', preferredHospital: '',
-  caregiverName: '', caregiverRelationship: '', caregiverPhone: '',
+  patientCareCoordinatorName: '', caregiverRelationship: '', patientCareCoordinatorPhone: '',
   medications: '',
   crFullName: '', crPhone: '', crEmail: '', crRelationship: '',
 };
@@ -126,9 +126,9 @@ export default function PatientIntakeForm({ onCompleted }: { onCompleted?: () =>
           doctorName:         intake?.doctor_therapist_name  || '',
           doctorPhone:        intake?.doctor_therapist_phone || '',
           preferredHospital:  intake?.preferred_hospital    || '',
-          caregiverName:      intake?.caregiver_name         || '',
+          patientCareCoordinatorName:      intake?.caregiver_name         || '',
           caregiverRelationship: intake?.caregiver_relationship || '',
-          caregiverPhone:     intake?.caregiver_phone        || '',
+          patientCareCoordinatorPhone:     intake?.caregiver_phone        || '',
           medications:        intake?.medications_and_dosage || '',
           crFullName:         intake?.closest_relative_full_name    || '',
           crPhone:            intake?.closest_relative_phone        || '',
@@ -414,19 +414,19 @@ const handleSave = async () => {
         </Field>
       </div>
 
-      {/* Section 5: Caregiver */}
+      {/* Section 5: Patient Care Coordinator */}
       <div className="bg-white rounded-2xl border border-soft-taupe shadow-sm p-6">
         <Section icon={Heart} title="Primary Caregiver" color="bg-gentle-coral" />
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Caregiver Name">
+            <Field label="Patient Care Coordinator Name">
               <input value={form.caregiverName} onChange={set('caregiverName')} className={inp()} />
             </Field>
             <Field label="Relationship">
               <input value={form.caregiverRelationship} onChange={set('caregiverRelationship')} placeholder="e.g. Daughter, Son" className={inp()} />
             </Field>
           </div>
-          <Field label="Caregiver Phone">
+          <Field label="Patient Care Coordinator Phone">
             <input type="tel" value={form.caregiverPhone} onChange={set('caregiverPhone')} className={inp()} />
           </Field>
         </div>

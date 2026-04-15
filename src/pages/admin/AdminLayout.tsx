@@ -2,20 +2,20 @@ import { useEffect, useState } from 'react';
 import { useApp } from '@/store/AppContext';
 import { supabase } from '@/lib/supabase';
 import { AdminDashboard } from './AdminDashboard';
-import { AdminCaregivers } from './AdminCaregivers';
+import PatientLayout from '@/pages/patient/PatientLayout';
+import PatientCareCoordinatorLayout from '@/pages/caregiver/PatientCareCoordinatorLayout';
+import TherapistLayout from '@/pages/therapist/TherapistLayout';
+import { AdminPatientCareCoordinators } from './AdminCaregivers';
 import { AdminPatients } from './AdminPatients';
 import { AdminAudit } from './AdminAudit';
 import { AdminPendingApprovals } from './AdminPendingApprovals';
-import PatientLayout from '@/pages/patient/PatientLayout';
-import CaregiverLayout from '@/pages/caregiver/CaregiverLayout';
-import TherapistLayout from '@/pages/therapist/TherapistLayout';
 import {
   LayoutDashboard, Users, UserCheck, FileText,
   Bell, LogOut, Heart, Clock, Stethoscope, ShieldCheck, Plus, Eye, EyeOff,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type AdminView = 'overview' | 'pending' | 'caregivers' | 'therapists' | 'admins' | 'patients' | 'audit' | 'portal_patient' | 'portal_coordinator' | 'portal_therapist' | 'portal_caregiver';
+type AdminView = 'overview' | 'pending' | 'patient_care_coordinators' | 'therapists' | 'admins' | 'patients' | 'audit' | 'portal_patient' | 'portal_coordinator' | 'portal_therapist' | 'portal_caregiver';
 
 // ── Role-filtered user list ───────────────────────────────────────────────────
 function UserDetailPanel({ user, onClose, onRefresh }: { user: any; onClose: () => void; onRefresh?: () => void }) {
@@ -27,7 +27,7 @@ function UserDetailPanel({ user, onClose, onRefresh }: { user: any; onClose: () 
     last_name:  user.last_name  || '',
     email:      user.email      || '',
     phone:      user.phone      || '',
-    role:       user.role       || 'caregiver',
+    role:       user.role       || 'patient_care_coordinator',
     newPassword: '',
   });
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -490,15 +490,15 @@ export default function AdminLayout() {
   const navItems = [
     { id: 'overview'   as AdminView, label: 'Dashboard',          icon: LayoutDashboard, badge: 0 },
     { id: 'pending'    as AdminView, label: 'Pending Approvals',   icon: Clock,           badge: pendingCount },
-    { id: 'caregivers' as AdminView, label: 'Caregivers',          icon: UserCheck,       badge: 0 },
+    { id: 'patient_care_coordinators' as AdminView, label: 'Patient Care Coordinators',          icon: UserCheck,       badge: 0 },
     { id: 'therapists' as AdminView, label: 'Therapists',          icon: Stethoscope,     badge: 0 },
     { id: 'admins'     as AdminView, label: 'Admins',              icon: ShieldCheck,     badge: 0 },
     { id: 'patients'   as AdminView, label: 'All Patients',        icon: Users,           badge: 0 },
     { id: 'audit'      as AdminView, label: 'Audit Log',           icon: FileText,        badge: 0 },,
-    { id: 'portal_patient'     as AdminView, label: 'View Patient Portal',             icon: Heart,       badge: 0, group: 'portals' },
-    { id: 'portal_coordinator' as AdminView, label: 'View Care Coordinator Portal',    icon: UserCheck,   badge: 0, group: 'portals' },
-    { id: 'portal_therapist'   as AdminView, label: 'View Therapist Portal',           icon: Stethoscope, badge: 0, group: 'portals' },
-    { id: 'portal_caregiver'   as AdminView, label: 'View Caregiver Portal',           icon: Users,       badge: 0, group: 'portals' },
+    { id: 'portal_patient'     as AdminView, label: 'View Patient Portal',             icon: Heart,       badge: 0 },
+    { id: 'portal_coordinator' as AdminView, label: 'View Care Coordinator Portal',    icon: UserCheck,   badge: 0 },
+    { id: 'portal_therapist'   as AdminView, label: 'View Therapist Portal',           icon: Stethoscope, badge: 0 },
+    { id: 'portal_caregiver'   as AdminView, label: 'View Patient Care Coordinator Portal',           icon: Users,       badge: 0 },
   ];
 
   const isPortalView = currentView.startsWith('portal_');
@@ -507,15 +507,15 @@ export default function AdminLayout() {
     switch (currentView) {
       case 'overview':   return <AdminDashboard onNavigate={(v) => setCurrentView(v as AdminView)} />;
       case 'pending':    return <AdminPendingApprovals onCountChange={setPendingCount} />;
-      case 'caregivers': return <AdminCaregivers />;
+      case 'patient_care_coordinators': return <AdminPatientCareCoordinators />;
       case 'therapists': return <RoleUserList role="therapist" title="Therapists" />;
       case 'admins':     return <RoleUserList role="admin"     title="Admins" />;
       case 'patients':   return <AdminPatients />;
       case 'audit':      return <AdminAudit />;
       case 'portal_patient':     return <PatientLayout />;
-      case 'portal_coordinator': return <CaregiverLayout />;
+      case 'portal_coordinator': return <PatientCareCoordinatorLayout />;
       case 'portal_therapist':   return <TherapistLayout />;
-      case 'portal_caregiver':   return <CaregiverLayout />;
+      case 'portal_caregiver':   return <PatientCareCoordinatorLayout />;
       default:           return <AdminDashboard onNavigate={(v) => setCurrentView(v as AdminView)} />;
     }
   };
@@ -584,7 +584,6 @@ export default function AdminLayout() {
               </button>
             );
           })}
-
           <div className="border-t border-soft-taupe my-3" />
           <p className="text-[10px] font-bold text-medium-gray uppercase tracking-wider px-3 pb-1.5">Portal Access</p>
           {navItems.filter(i => i.id.startsWith('portal_')).map((item) => {

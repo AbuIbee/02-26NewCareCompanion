@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { MoodType } from '@/types';
 
-export default function CaregiverMood() {
+export default function PatientCareCoordinatorMood() {
   const { state, dispatch } = useApp();
   const selectedPatient = useSelectedPatient();
   const [showLogDialog, setShowLogDialog] = useState(false);
@@ -59,7 +59,7 @@ export default function CaregiverMood() {
       triggers: triggers.split(',').map(t => t.trim()).filter(Boolean),
       timeOfDay: (format(new Date(), 'a').toLowerCase().includes('am') ? 'morning' : 'afternoon') as 'morning' | 'afternoon' | 'evening' | 'night',
       timestamp: new Date().toISOString(),
-      recordedBy: state.currentUser?.firstName || 'Caregiver',
+      recordedBy: state.currentUser?.firstName || 'Patient Care Coordinator',
     };
 
     dispatch({ type: 'ADD_MOOD_ENTRY', payload: newEntry });

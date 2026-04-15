@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '@/store/AppContext';
 import { supabase } from '@/lib/supabase';
+import { TIERS, FREE_TRIAL_DAYS } from '@/types/subscription';
 import { Heart, ArrowLeft, Eye, EyeOff, Tag, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -77,6 +78,59 @@ function SignInForm({ onBack, onSuccess }: { onBack: () => void; onSuccess: () =
         await supabase.auth.signOut(); return;
       }
 
+      // ── Check subscription status before granting access ─────────────────
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('status, tier, trial_ends_at, stripe_subscription_id')
+        .eq('user_id', profile.id)
+        .maybeSingle();
+
+      // Admin, caregivers, master accounts — always let through
+      const isPrivileged = ['admin', 'caregiver', 'master'].includes(profile.role);
+      const isMaster = sub?.tier === 'master';
+      const isActive = sub && (
+        sub.status === 'active' ||
+        sub.status === 'promo' ||
+        (sub.status === 'trialing' && new Date(sub.trial_ends_at) > new Date()) ||
+        isMaster
+      );
+
+      if (!isPrivileged && !isActive) {
+        // Trial expired or no payment — send to Stripe
+        const tierName = sub?.tier ?? 'companion';
+        const tierConfig = TIERS[tierName as keyof typeof TIERS] ?? TIERS['companion'];
+        const priceId = tierConfig.stripePriceIdMonthly;
+
+        if (!priceId) {
+          toast.error('Your trial has expired. Please contact support to reactivate your account.');
+          await supabase.auth.signOut();
+          return;
+        }
+
+        toast('Your trial has ended — completing payment setup…', { duration: 4000 });
+        const trialEnd = new Date(Date.now() + FREE_TRIAL_DAYS * 86400000).toISOString();
+
+        const fnRes = await fetch('https://ktehhvmmwnsbcvpjcmzt.supabase.co/functions/v1/create-checkout-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`,
+          },
+          body: JSON.stringify({ priceId, tierName, userId: profile.id, email: profile.email, trialEnd }),
+        });
+        const fnJson = await fnRes.json();
+
+        if (!fnRes.ok || !fnJson.url) {
+          toast.error('Unable to reach payment processor. Please try again.');
+          await supabase.auth.signOut();
+          return;
+        }
+
+        window.location.href = fnJson.url;
+        return;
+      }
+
+      // Active subscription — grant access
       dispatch({ type: 'SET_USER', payload: {
         id: profile.id, email: profile.email,
         firstName: profile.first_name, lastName: profile.last_name,
@@ -98,18 +152,18 @@ function SignInForm({ onBack, onSuccess }: { onBack: () => void; onSuccess: () =
     <div className="space-y-5">
       <div className="text-center space-y-1">
         <h2 className="text-2xl font-bold text-charcoal">Sign In</h2>
-        <p className="text-medium-gray text-sm">Welcome back to Memoria Helps</p>
+        <p className="text-medium-gray text-sm">Welcome back to My Memoria Ally</p>
       </div>
 
       <Field label="Email Address" error={errors.email} required>
         <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="you@example.com" className={inp(errors.email)} autoComplete="email" />
+          placeholder="you@example.com" className={inp(errors.email)} autoComplete="email" onKeyDown={e => e.key === 'Enter' && handleSignIn()} />
       </Field>
 
       <Field label="Password" error={errors.password} required>
         <div className="relative">
           <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-            placeholder="Your password" className={inp(errors.password) + ' pr-10'} autoComplete="current-password" />
+            placeholder="Your password" className={inp(errors.password) + ' pr-10'} autoComplete="current-password" onKeyDown={e => e.key === 'Enter' && handleSignIn()} />
           <button type="button" onClick={() => setShowPw(p => !p)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-medium-gray hover:text-charcoal">
             {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -200,13 +254,20 @@ function SignUpForm({ onBack, onSignedIn }: { onBack: () => void; onSignedIn: (u
     setLoading(true);
     try {
       // 1. Create auth user
+      const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
       const { data, error } = await supabase.auth.signUp({
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        options: { data: { first_name: form.firstName.trim(), last_name: form.lastName.trim(), role: 'patient' } },
+        options: {
+          emailRedirectTo: siteUrl,
+          data: { first_name: form.firstName.trim(), last_name: form.lastName.trim(), role: 'patient' },
+        },
       });
       if (error) { toast.error(error.message); return; }
       if (!data.user) throw new Error('No user returned');
+
+      // If Supabase returns a user but no session, email confirmation is required
+      const needsConfirmation = !data.session && data.user;
 
       const uid = data.user.id;
       const now = new Date().toISOString();
@@ -251,11 +312,12 @@ function SignUpForm({ onBack, onSignedIn }: { onBack: () => void; onSignedIn: (u
       }, { onConflict: 'patient_profile_id' });
 
       // 5. Handle promo code / subscription
+      // Status = pending_payment until Stripe webhook confirms card collection
       const isPromo = promoStatus === 'valid' && form.promoCode.trim();
       await supabase.from('subscriptions').upsert({
         user_id: uid,
         tier: 'companion',
-        status: isPromo ? 'promo' : 'trialing',
+        status: isPromo ? 'promo' : 'pending_payment',
         trial_started_at: now,
         trial_ends_at: isPromo
           ? new Date(Date.now() + 45 * 86400000).toISOString()
@@ -270,6 +332,17 @@ function SignUpForm({ onBack, onSignedIn }: { onBack: () => void; onSignedIn: (u
         sms_consent: form.agreeTexts,
         terms_accepted_at: now,
       }).eq('id', uid);
+
+      if (needsConfirmation) {
+        // Email confirmation required — show success message but don't log in yet
+        toast.success(
+          `Account created! Check your email at ${form.email.trim().toLowerCase()} to confirm your account, then sign in.`,
+          { duration: 8000 }
+        );
+        setLoading(false);
+        onBack(); // Go back to sign-in screen
+        return;
+      }
 
       toast.success(`Welcome, ${form.firstName}! Your account is ready.`);
       onSignedIn(uid);
@@ -309,7 +382,7 @@ function SignUpForm({ onBack, onSignedIn }: { onBack: () => void; onSignedIn: (u
       {step === 1 && (
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-charcoal">Create your account</h2>
-          <p className="text-sm text-medium-gray">Free for 30 days — no credit card needed.</p>
+          <p className="text-sm text-medium-gray">Free for 30 days — your card will not be charged.</p>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="First Name" error={errors.firstName} required>
@@ -476,7 +549,7 @@ function LandingButtons({ onSignIn, onSignUp }: { onSignIn: () => void; onSignUp
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-charcoal">Memoria Helps</h1>
+        <h1 className="text-3xl font-bold text-charcoal">My Memoria Ally</h1>
         <p className="text-medium-gray">Compassionate care, every day</p>
       </div>
 
@@ -492,7 +565,7 @@ function LandingButtons({ onSignIn, onSignUp }: { onSignIn: () => void; onSignUp
       </div>
 
       <p className="text-center text-xs text-medium-gray">
-        Free for 30 days — no credit card needed.
+        Free for 30 days — your card will not be charged.
       </p>
 
       {/* Staff access */}
@@ -521,20 +594,47 @@ export default function LoginPage() {
     // Nothing — App.tsx detects auth state change and routes
   };
 
-  const handleNewUser = (userId: string) => {
-    // Dispatch login — App.tsx routes to PatientLayout which shows intake popup
-    supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-      .then(({ data: profile }) => {
-        if (!profile) return;
-        dispatch({ type: 'SET_USER', payload: {
-          id: profile.id, email: profile.email,
-          firstName: profile.first_name, lastName: profile.last_name,
-          role: 'patient', phone: profile.phone || undefined,
-          createdAt: profile.created_at, updatedAt: profile.updated_at,
-        }});
-        dispatch({ type: 'SET_ROLE',          payload: 'patient' });
-        dispatch({ type: 'SET_AUTHENTICATED', payload: true });
+  const handleNewUser = async (userId: string) => {
+    // Account created — now redirect to Stripe to collect payment
+    try {
+      const { data: profile } = await supabase.from('profiles').select('email').eq('id', userId).maybeSingle();
+      if (!profile) { toast.error('Account setup failed. Please try again.'); return; }
+
+      const priceId =
+        import.meta.env.VITE_STRIPE_PRICE_COMPANION_MONTHLY ||
+        TIERS['companion']?.stripePriceIdMonthly || '';
+
+      if (!priceId) {
+        toast.error('Payment configuration missing. Please contact support.', { duration: 8000 });
+        await supabase.auth.signOut();
+        return;
+      }
+
+      const trialEnd = new Date(Date.now() + FREE_TRIAL_DAYS * 86400000).toISOString();
+      toast.success(`Account created! Redirecting to secure checkout…`);
+
+      const fnRes = await fetch('https://ktehhvmmwnsbcvpjcmzt.supabase.co/functions/v1/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`,
+        },
+        body: JSON.stringify({ priceId, tierName: 'companion', userId, email: profile.email, trialEnd }),
       });
+      const fnJson = await fnRes.json();
+
+      if (!fnRes.ok || !fnJson.url) {
+        console.error('Checkout error:', fnJson.error ?? 'No URL');
+        toast.error('Unable to reach payment processor. Please try again.', { duration: 8000 });
+        await supabase.auth.signOut();
+        return;
+      }
+
+      window.location.href = fnJson.url;
+    } catch (err: any) {
+      toast.error('Something went wrong. Please try again.');
+      await supabase.auth.signOut();
+    }
   };
 
   return (
@@ -551,7 +651,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-warm-bronze rounded-lg flex items-center justify-center">
               <Heart className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-charcoal">Memoria Helps</span>
+            <span className="font-semibold text-charcoal">My Memoria Ally</span>
           </div>
         </div>
       </header>

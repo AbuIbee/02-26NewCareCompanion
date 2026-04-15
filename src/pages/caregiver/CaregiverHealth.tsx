@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function CaregiverHealth() {
+export default function PatientCareCoordinatorHealth() {
   const { state } = useApp();
   const selectedPatient = useSelectedPatient();
   const [showAddDialog, setShowAddDialog] = useState(false);

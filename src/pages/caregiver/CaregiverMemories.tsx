@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { Memory } from '@/types';
 
-export default function CaregiverMemories() {
+export default function PatientCareCoordinatorMemories() {
   const { state, dispatch } = useApp();
   const selectedPatient = useSelectedPatient();
   const memories = selectedPatient?.memories || state.memories;
@@ -41,7 +41,7 @@ export default function CaregiverMemories() {
       category: 'photo',
       isFavorite: false,
       createdAt: new Date().toISOString(),
-      createdBy: state.currentUser?.firstName || 'Caregiver',
+      createdBy: state.currentUser?.firstName || 'Patient Care Coordinator',
     };
 
     dispatch({ type: 'ADD_MEMORY', payload: memory });

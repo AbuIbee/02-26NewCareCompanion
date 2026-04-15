@@ -43,7 +43,7 @@ const educationModules = [
   { id: 1, title: 'Understanding Dementia Stages', category: 'dementia_basics', duration: 15, progress: 75, icon: BookOpen },
   { id: 2, title: 'Communication Techniques', category: 'communication', duration: 20, progress: 30, icon: MessageSquare },
   { id: 3, title: 'Managing Challenging Behaviors', category: 'behavior_management', duration: 25, progress: 0, icon: AlertCircle },
-  { id: 4, title: 'Caregiver Burnout Prevention', category: 'self_care', duration: 15, progress: 50, icon: Heart },
+  { id: 4, title: 'Patient Care Coordinator Burnout Prevention', category: 'self_care', duration: 15, progress: 50, icon: Heart },
   { id: 5, title: 'Legal & Financial Planning', category: 'legal', duration: 30, progress: 0, icon: Shield },
 ];
 
@@ -55,14 +55,14 @@ const quickStatusOptions = [
   { label: 'Agitated', icon: Zap, color: 'bg-warm-amber/20 text-warm-amber' },
 ];
 
-// Caregiver tips from community
+// Patient Care Coordinator tips from community
 const communityTips = [
-  { tip: 'I play the same playlist every evening - it signals bedtime.', author: 'Caregiver in NC' },
-  { tip: 'Photo albums are my secret weapon for redirecting.', author: 'Caregiver in TX' },
-  { tip: 'Taking 10 minutes to myself prevents burnout.', author: 'Caregiver in CA' },
+  { tip: 'I play the same playlist every evening - it signals bedtime.', author: 'Patient Care Coordinator in NC' },
+  { tip: 'Photo albums are my secret weapon for redirecting.', author: 'Patient Care Coordinator in TX' },
+  { tip: 'Taking 10 minutes to myself prevents burnout.', author: 'Patient Care Coordinator in CA' },
 ];
 
-export default function CaregiverProfile() {
+export default function PatientCareCoordinatorProfile() {
   const { state } = useApp();
   const user = state.currentUser;
   const patient = state.patient;
@@ -114,7 +114,7 @@ export default function CaregiverProfile() {
             <h3 className="text-xl font-semibold text-charcoal">
               {user?.firstName} {user?.lastName}
             </h3>
-            <p className="text-medium-gray">Caregiver</p>
+            <p className="text-medium-gray">Patient Care Coordinator</p>
             <p className="text-sm text-medium-gray">Caring for: {patient?.preferredName}</p>
           </div>
         </div>
@@ -306,7 +306,7 @@ export default function CaregiverProfile() {
 
   const renderSelfCareTab = () => (
     <div className="space-y-6">
-      {/* Caregiver Status Header */}
+      {/* Patient Care Coordinator Status Header */}
       <Card className={`p-6 border-0 shadow-soft border-l-4 ${
         caregiverStress === 'high' ? 'border-l-gentle-coral' :
         caregiverStress === 'medium' ? 'border-l-warm-amber' : 'border-l-soft-sage'
@@ -373,7 +373,7 @@ export default function CaregiverProfile() {
       <Card className="p-6 bg-white border-0 shadow-soft">
         <h3 className="text-lg font-semibold text-charcoal mb-4 flex items-center gap-2">
           <Users className="w-5 h-5 text-warm-bronze" />
-          Tips from Other Caregivers
+          Tips from Other Patient Care Coordinators
         </h3>
         <div className="space-y-4">
           {communityTips.map((tip, index) => (
@@ -614,7 +614,7 @@ export default function CaregiverProfile() {
               <Users className="w-5 h-5 mr-3" />
               <div className="text-left">
                 <p className="font-medium">Crisis Support Line</p>
-                <p className="text-xs opacity-70">24/7 caregiver helpline</p>
+                <p className="text-xs opacity-70">24/7 patient care coordinator helpline</p>
               </div>
             </Button>
           </div>

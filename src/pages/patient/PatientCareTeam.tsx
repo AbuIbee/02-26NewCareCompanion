@@ -8,7 +8,7 @@ interface TeamMember {
   name: string;
   email: string;
   phone?: string;
-  role: 'caregiver' | 'therapist';
+  role: 'patient_care_coordinator' | 'therapist';
 }
 
 export default function PatientCareTeam() {
@@ -81,7 +81,7 @@ export default function PatientCareTeam() {
         <div className="text-center py-12 bg-white rounded-2xl border border-soft-taupe">
           <User className="w-12 h-12 mx-auto mb-3 text-soft-taupe" />
           <p className="font-medium text-charcoal">No care team assigned yet</p>
-          <p className="text-sm text-medium-gray mt-1">Your caregiver or therapist will appear here once assigned</p>
+          <p className="text-sm text-medium-gray mt-1">Your patient care coordinator or therapist will appear here once assigned</p>
         </div>
       ) : (
         <div className="space-y-4">

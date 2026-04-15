@@ -11,7 +11,7 @@ import { Plus, FileText, Upload, Download, File, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-export default function CaregiverDocuments() {
+export default function PatientCareCoordinatorDocuments() {
   const { state } = useApp();
   const selectedPatient = useSelectedPatient();
   const documents = selectedPatient?.documents || state.documents;

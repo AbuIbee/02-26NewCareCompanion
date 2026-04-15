@@ -10,7 +10,7 @@ import { Plus, Phone, Mail, Building2, Star, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-export default function CaregiverCareTeam() {
+export default function PatientCareCoordinatorCareTeam() {
   const { state } = useApp();
   const careTeam = state.careTeam;
   const [showAddDialog, setShowAddDialog] = useState(false);

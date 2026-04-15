@@ -440,7 +440,7 @@ export default function TherapistDashboard() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-charcoal flex items-center gap-2">
             <Users className="w-5 h-5 text-warm-bronze" />
-            Caregiver Status
+            Patient Care Coordinator Status
           </h3>
           <Button
             onClick={sendSupportResources}
@@ -665,7 +665,7 @@ export default function TherapistDashboard() {
           </Button>
           <Button variant="outline" className="border-soft-taupe text-charcoal hover:bg-soft-taupe rounded-xl">
             <Users className="w-4 h-4 mr-2" />
-            Contact Caregiver
+            Contact Patient Care Coordinator
           </Button>
           <Button variant="outline" className="border-warm-bronze text-warm-bronze hover:bg-warm-bronze hover:text-white rounded-xl">
             <Calendar className="w-4 h-4 mr-2" />

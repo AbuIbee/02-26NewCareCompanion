@@ -10,7 +10,7 @@ import { UserPlus, Loader2, Stethoscope, Pill, Phone, MapPin, User, Eye, EyeOff 
 import { toast } from 'sonner';
 import type { PatientIntakeFormData, DementiaStage } from '@/types/patientIntake';
 
-// Public patient intake page mirrors the caregiver intake UI,
+// Public patient intake page mirrors the patient care coordinator intake UI,
 // but only saves to patient_intake and does not provision an auth account.
 // US States for dropdown
 const US_STATES = [
@@ -48,10 +48,10 @@ export default function PublicPatientIntakePage() {
     doctorTherapistName: '',
     doctorTherapistPhone: '',
 
-    // Caregiver Information (snapshot)
-    caregiverName: '',
+    // Patient Care Coordinator Information (snapshot)
+    patientCareCoordinatorName: '',
     caregiverRelationship: '',
-    caregiverPhone: '',
+    patientCareCoordinatorPhone: '',
 
     // Medications
     medicationsAndDosage: '',
@@ -129,9 +129,9 @@ export default function PublicPatientIntakePage() {
         preferredHospital: '',
         doctorTherapistName: '',
         doctorTherapistPhone: '',
-        caregiverName: '',
+        patientCareCoordinatorName: '',
         caregiverRelationship: '',
-        caregiverPhone: '',
+        patientCareCoordinatorPhone: '',
         medicationsAndDosage: '',
         closestRelativeFullName: '',
         closestRelativePhone: '',
@@ -400,7 +400,7 @@ export default function PublicPatientIntakePage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-warm-bronze" />
-                  Caregiver Information
+                  Patient Care Coordinator Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -540,7 +540,7 @@ export default function PublicPatientIntakePage() {
       <div className="text-center text-sm text-medium-gray mb-4">
         {currentStep === 1 && 'Patient Information'}
         {currentStep === 2 && 'Doctor / Therapist'}
-        {currentStep === 3 && 'Caregiver & Medications'}
+        {currentStep === 3 && 'Patient Care Coordinator & Medications'}
         {currentStep === 4 && 'Emergency Contact'}
       </div>
 

@@ -43,10 +43,10 @@ interface ProfileForm {
   preferredHospital:  string;
   doctorName:         string;
   doctorPhone:        string;
-  // Step 3 — Caregiver & Meds
-  caregiverName:      string;
+  // Step 3 — Patient Care Coordinator & Meds
+  patientCareCoordinatorName:      string;
   caregiverRelationship: string;
-  caregiverPhone:     string;
+  patientCareCoordinatorPhone:     string;
   medications:        string;
   // Step 4 — Emergency Contact
   ecFullName:         string;
@@ -59,7 +59,7 @@ const EMPTY_FORM: ProfileForm = {
   firstName:'', lastName:'', preferredName:'', dateOfBirth:'', phone:'',
   diagnosisDate:'', dementiaStage:'', streetAddress:'', city:'', state:'', zipCode:'',
   preferredHospital:'', doctorName:'', doctorPhone:'',
-  caregiverName:'', caregiverRelationship:'', caregiverPhone:'', medications:'',
+  patientCareCoordinatorName:'', caregiverRelationship:'', patientCareCoordinatorPhone:'', medications:'',
   ecFullName:'', ecPhone:'', ecEmail:'', ecRelationship:'',
 };
 
@@ -109,9 +109,9 @@ export default function PatientProfileSetup() {
           preferredHospital:  intake?.preferred_hospital    || '',
           doctorName:         intake?.doctor_therapist_name || '',
           doctorPhone:        intake?.doctor_therapist_phone|| '',
-          caregiverName:      intake?.caregiver_name        || '',
+          patientCareCoordinatorName:      intake?.caregiver_name        || '',
           caregiverRelationship: intake?.caregiver_relationship || '',
-          caregiverPhone:     intake?.caregiver_phone       || '',
+          patientCareCoordinatorPhone:     intake?.caregiver_phone       || '',
           medications:        intake?.medications_and_dosage || patient?.medications_summary || '',
           ecFullName:         intake?.emergency_contact_full_name || patient?.emergency_contact_name || '',
           ecPhone:            intake?.emergency_contact_phone || patient?.emergency_contact_phone || '',
@@ -353,7 +353,7 @@ export default function PatientProfileSetup() {
             </Card>
           )}
 
-          {/* ── STEP 3: Caregiver & Medications ────────────────────────── */}
+          {/* ── STEP 3: Patient Care Coordinator & Medications ────────────────────────── */}
           {step === 3 && (
             <div className="space-y-4">
               <Card className="border-0 shadow-sm">

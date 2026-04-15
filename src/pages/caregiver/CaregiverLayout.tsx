@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useApp, initializeMockData } from '@/store/AppContext';
 import { useAllPatients, useSelectedPatient } from '@/hooks/useSelectedPatient';
-import { getCaregiverPatients } from '@/services/patientService';
+import { getPatientCareCoordinatorPatients } from '@/services/patientService';
 import { supabase } from '@/lib/supabase';
-import CaregiverDashboard from './CaregiverDashboard';
-import CaregiverMedications from './CaregiverMedications';
-import CaregiverHealth from './CaregiverHealth';
-import CaregiverMood from './CaregiverMood';
-import CaregiverMemories from './CaregiverMemories';
-import CaregiverDocuments from './CaregiverDocuments';
-import CaregiverReminders from './CaregiverReminders';
-import CaregiverProfile from './CaregiverProfile';
-import CaregiverCrisisPrevention from './CaregiverCrisisPrevention';
+import PatientCareCoordinatorDashboard from './PatientCareCoordinatorDashboard';
+import PatientCareCoordinatorMedications from './PatientCareCoordinatorMedications';
+import PatientCareCoordinatorHealth from './PatientCareCoordinatorHealth';
+import PatientCareCoordinatorMood from './PatientCareCoordinatorMood';
+import PatientCareCoordinatorMemories from './PatientCareCoordinatorMemories';
+import PatientCareCoordinatorDocuments from './PatientCareCoordinatorDocuments';
+import PatientCareCoordinatorReminders from './PatientCareCoordinatorReminders';
+import PatientCareCoordinatorProfile from './PatientCareCoordinatorProfile';
+import PatientCareCoordinatorCrisisPrevention from './PatientCareCoordinatorCrisisPrevention';
 import MultiPatientDashboard from './MultiPatientDashboard';
 import AddPatientPage from './AddPatientPage';
 import PatientTimeline from './PatientTimeline';
@@ -25,7 +25,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
-type CaregiverView =
+type PatientCareCoordinatorView =
   | 'dashboard' | 'medications' | 'routines' | 'memories' | 'mood'
   | 'documents' | 'reminders' | 'crisis' | 'timeline' | 'addPatient' | 'myportal' | 'media';
 
@@ -35,8 +35,8 @@ function EmptyState({ onAddPatient, onEnterDemo, onLogout, onRefresh, currentVie
   onEnterDemo: () => void;
   onLogout: () => void;
   onRefresh: () => void;
-  currentView: CaregiverView;
-  setCurrentView: (v: CaregiverView) => void;
+  currentView: PatientCareCoordinatorView;
+  setCurrentView: (v: PatientCareCoordinatorView) => void;
 }) {
   return (
     <div className="min-h-screen bg-warm-ivory flex flex-col">
@@ -95,7 +95,7 @@ function EmptyState({ onAddPatient, onEnterDemo, onLogout, onRefresh, currentVie
           <p className="text-xs text-medium-gray">
             If you already have patients but don't see them,{' '}
             <button onClick={onRefresh} className="text-warm-bronze underline">click Refresh</button>
-            {' '}or check that your account has caregiver access in Supabase.
+            {' '}or check that your account has patient care coordinator access in Supabase.
           </p>
         </motion.div>
       </div>
@@ -110,7 +110,7 @@ function EmptyState({ onAddPatient, onEnterDemo, onLogout, onRefresh, currentVie
         ].map(({ id, icon: Icon, label }) => {
           const isActive = currentView === id;
           return (
-            <button key={id} onClick={() => setCurrentView(id as CaregiverView)}
+            <button key={id} onClick={() => setCurrentView(id as PatientCareCoordinatorView)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${isActive ? 'text-warm-bronze' : 'text-medium-gray'}`}>
               <Icon className="w-5 h-5" />
               <span className="text-xs font-medium">{label}</span>
@@ -139,24 +139,24 @@ function DemoModeBanner({ onExitDemo }: { onExitDemo: () => void }) {
 }
 
 // ── Main Layout ──────────────────────────────────────────────────────────────
-export default function CaregiverLayout() {
+export default function PatientCareCoordinatorLayout() {
   // 🐛 DEBUG: Component render start
-  console.log('🎬 [CaregiverLayout] Component render START');
+  console.log('🎬 [PatientCareCoordinatorLayout] Component render START');
 
   // ✅ CRITICAL: ALL HOOKS MUST BE CALLED FIRST, BEFORE ANY CONDITIONAL RETURNS
   // This is the #1 cause of React Error #310
   
   // All useState hooks first
-  const [currentView, setCurrentView] = useState<CaregiverView>('dashboard');
+  const [currentView, setCurrentView] = useState<PatientCareCoordinatorView>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const [isLoadingPatients, setIsLoadingPatients] = useState(true);
   const [hasRealPatients, setHasRealPatients] = useState(false);
-  console.log('🪝 [CaregiverLayout] All useState hooks called');
+  console.log('🪝 [PatientCareCoordinatorLayout] All useState hooks called');
 
   // Context and custom hooks
   const { state, dispatch } = useApp();
-  console.log('🪝 [CaregiverLayout] useApp() called', {
+  console.log('🪝 [PatientCareCoordinatorLayout] useApp() called', {
     user: state.currentUser?.id,
     patientsCount: state.patients.length,
     isDemoMode: state.isDemoMode,
@@ -164,10 +164,10 @@ export default function CaregiverLayout() {
   });
 
   const allPatients = useAllPatients();
-  console.log('🪝 [CaregiverLayout] useAllPatients() called', { count: allPatients.length });
+  console.log('🪝 [PatientCareCoordinatorLayout] useAllPatients() called', { count: allPatients.length });
 
   const selectedPatient = useSelectedPatient();
-  console.log('🪝 [CaregiverLayout] useSelectedPatient() called', { 
+  console.log('🪝 [PatientCareCoordinatorLayout] useSelectedPatient() called', { 
     patientId: selectedPatient?.patient.id || 'none' 
   });
 
@@ -175,11 +175,11 @@ export default function CaregiverLayout() {
 
   // All useEffect hooks
   useEffect(() => {
-    console.log('🪝 [CaregiverLayout] useEffect[loadPatients] - STARTING');
+    console.log('🪝 [PatientCareCoordinatorLayout] useEffect[loadPatients] - STARTING');
     loadPatients();
   }, []);
   
-  console.log('✅ [CaregiverLayout] All hooks complete, proceeding to logic');
+  console.log('✅ [PatientCareCoordinatorLayout] All hooks complete, proceeding to logic');
 
   // ✅ NOW it's safe to define functions and do conditional logic
   
@@ -191,8 +191,8 @@ export default function CaregiverLayout() {
       console.log('📡 [loadPatients] Session check:', { hasSession: !!session?.user });
       
       if (session?.user) {
-        console.log('📡 [loadPatients] Fetching caregiver patients...');
-        const patients = await getCaregiverPatients();
+        console.log('📡 [loadPatients] Fetching patient care coordinator patients...');
+        const patients = await getPatientCareCoordinatorPatients();
         console.log('📡 [loadPatients] Patients fetched:', { count: patients?.length || 0 });
         
         if (patients && patients.length > 0) {
@@ -244,7 +244,7 @@ export default function CaregiverLayout() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const patients = await getCaregiverPatients();
+        const patients = await getPatientCareCoordinatorPatients();
         if (patients && patients.length > 0) {
           dispatch({ type: 'SET_PATIENTS', payload: patients });
           const targetId = patientProfileId || patients[patients.length - 1].patient.id;
@@ -263,17 +263,17 @@ export default function CaregiverLayout() {
   };
 
   const navItems = [
-    { id: 'dashboard'   as CaregiverView, label: 'Dashboard',        icon: LayoutDashboard },
-    { id: 'medications' as CaregiverView, label: 'Medications',       icon: Pill },
-    { id: 'routines'    as CaregiverView, label: 'Routines',          icon: Calendar },
-    { id: 'memories'    as CaregiverView, label: 'Memories',          icon: BookOpen },
-    { id: 'mood'        as CaregiverView, label: 'Mood Tracker',      icon: Heart },
-    { id: 'documents'   as CaregiverView, label: 'Documents',         icon: FileText },
-    { id: 'reminders'   as CaregiverView, label: 'Reminders',         icon: Bell },
-    { id: 'crisis'      as CaregiverView, label: 'Crisis Prevention', icon: AlertTriangle },
-    { id: 'timeline'    as CaregiverView, label: 'Timeline',          icon: Clock },
-    { id: 'media'       as CaregiverView, label: 'Videos & Media',    icon: Film },
-    { id: 'myportal'    as CaregiverView, label: 'My Portal',         icon: User },
+    { id: 'dashboard'   as PatientCareCoordinatorView, label: 'Dashboard',        icon: LayoutDashboard },
+    { id: 'medications' as PatientCareCoordinatorView, label: 'Medications',       icon: Pill },
+    { id: 'routines'    as PatientCareCoordinatorView, label: 'Routines',          icon: Calendar },
+    { id: 'memories'    as PatientCareCoordinatorView, label: 'Memories',          icon: BookOpen },
+    { id: 'mood'        as PatientCareCoordinatorView, label: 'Mood Tracker',      icon: Heart },
+    { id: 'documents'   as PatientCareCoordinatorView, label: 'Documents',         icon: FileText },
+    { id: 'reminders'   as PatientCareCoordinatorView, label: 'Reminders',         icon: Bell },
+    { id: 'crisis'      as PatientCareCoordinatorView, label: 'Crisis Prevention', icon: AlertTriangle },
+    { id: 'timeline'    as PatientCareCoordinatorView, label: 'Timeline',          icon: Clock },
+    { id: 'media'       as PatientCareCoordinatorView, label: 'Videos & Media',    icon: Film },
+    { id: 'myportal'    as PatientCareCoordinatorView, label: 'My Portal',         icon: User },
   ];
 
   const handlePatientSelect = (patientId: string | null) => {
@@ -295,7 +295,7 @@ export default function CaregiverLayout() {
   
   // ── Loading ──
   if (isLoadingPatients) {
-    console.log('🔄 [CaregiverLayout] Rendering: LOADING STATE');
+    console.log('🔄 [PatientCareCoordinatorLayout] Rendering: LOADING STATE');
     return (
       <div className="min-h-screen bg-warm-ivory flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -308,7 +308,7 @@ export default function CaregiverLayout() {
 
   // ── Empty State ──
   if (allPatients.length === 0 && !isDemoMode && currentView !== 'addPatient') {
-    console.log('📭 [CaregiverLayout] Rendering: EMPTY STATE');
+    console.log('📭 [PatientCareCoordinatorLayout] Rendering: EMPTY STATE');
     return <EmptyState 
       onAddPatient={() => setCurrentView('addPatient')} 
       onEnterDemo={handleEnterDemo} 
@@ -321,7 +321,7 @@ export default function CaregiverLayout() {
 
   // ── Add Patient from empty state (no sidebar yet) ──
   if (currentView === 'addPatient' && allPatients.length === 0 && !isDemoMode) {
-    console.log('➕ [CaregiverLayout] Rendering: ADD PATIENT (empty state)');
+    console.log('➕ [PatientCareCoordinatorLayout] Rendering: ADD PATIENT (empty state)');
     return (
       <div className="min-h-screen bg-warm-ivory p-6">
         <AddPatientPage onBack={() => setCurrentView('dashboard')} onPatientAdded={handlePatientAdded} />
@@ -338,22 +338,22 @@ export default function CaregiverLayout() {
       return <MultiPatientDashboard onSelectPatient={handlePatientSelect} onAddPatient={() => setCurrentView('addPatient')} />;
     }
     switch (currentView) {
-      case 'dashboard':   return <CaregiverDashboard />;
-      case 'medications': return <CaregiverMedications />;
-      case 'routines':    return <CaregiverHealth />;
-      case 'mood':        return <CaregiverMood />;
-      case 'memories':    return <CaregiverMemories />;
-      case 'documents':   return <CaregiverDocuments />;
-      case 'reminders':   return <CaregiverReminders />;
-      case 'crisis':      return <CaregiverCrisisPrevention />;
+      case 'dashboard':   return <PatientCareCoordinatorDashboard />;
+      case 'medications': return <PatientCareCoordinatorMedications />;
+      case 'routines':    return <PatientCareCoordinatorHealth />;
+      case 'mood':        return <PatientCareCoordinatorMood />;
+      case 'memories':    return <PatientCareCoordinatorMemories />;
+      case 'documents':   return <PatientCareCoordinatorDocuments />;
+      case 'reminders':   return <PatientCareCoordinatorReminders />;
+      case 'crisis':      return <PatientCareCoordinatorCrisisPrevention />;
       case 'timeline':    return <PatientTimeline />;
       case 'media':       return <MediaUploader />;
-      case 'myportal':    return <CaregiverProfile />;
+      case 'myportal':    return <PatientCareCoordinatorProfile />;
       default:            return <MultiPatientDashboard onSelectPatient={handlePatientSelect} onAddPatient={() => setCurrentView('addPatient')} />;
     }
   };
 
-  console.log('✨ [CaregiverLayout] Rendering: FULL LAYOUT');
+  console.log('✨ [PatientCareCoordinatorLayout] Rendering: FULL LAYOUT');
 
   return (
     <div className={`min-h-screen bg-warm-ivory flex ${isDemoMode ? 'pt-10' : ''}`}>
@@ -485,7 +485,7 @@ export default function CaregiverLayout() {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="font-medium text-charcoal">{state.currentUser?.firstName} {state.currentUser?.lastName}</p>
-              <p className="text-sm text-medium-gray">{isDemoMode ? '🎭 Demo Mode' : 'Caregiver'}</p>
+              <p className="text-sm text-medium-gray">{isDemoMode ? '🎭 Demo Mode' : 'Patient Care Coordinator'}</p>
             </div>
             {selectedPatientAlerts > 0 && (
               <div className="relative">

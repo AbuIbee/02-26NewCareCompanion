@@ -328,23 +328,23 @@ function generatePatientData(patientId: string, patientInfo: Partial<Patient>): 
   ];
 
   const medicationLogs: MedicationLog[] = [
-    { id: `${patientId}-ml1`, medicationId: `${patientId}-m1`, patientId, medicationName: 'Donepezil 5mg', scheduledTime: '8:30 AM', takenTime: '8:35 AM', status: 'taken', recordedBy: 'Caregiver', date: new Date().toISOString().split('T')[0] },
+    { id: `${patientId}-ml1`, medicationId: `${patientId}-m1`, patientId, medicationName: 'Donepezil 5mg', scheduledTime: '8:30 AM', takenTime: '8:35 AM', status: 'taken', recordedBy: 'Patient Care Coordinator', date: new Date().toISOString().split('T')[0] },
     { id: `${patientId}-ml2`, medicationId: `${patientId}-m2`, patientId, medicationName: 'Memantine 10mg', scheduledTime: '2:00 PM', status: 'pending', recordedBy: 'System', date: new Date().toISOString().split('T')[0] },
     { id: `${patientId}-ml3`, medicationId: `${patientId}-m3`, patientId, medicationName: 'Vitamin D3 1000 IU', scheduledTime: '8:00 PM', status: 'pending', recordedBy: 'System', date: new Date().toISOString().split('T')[0] },
   ];
 
   const moodEntries: MoodEntry[] = [
-    { id: `${patientId}-me1`, patientId, mood: 'calm', intensity: 7, note: 'Enjoyed looking at photo album', triggers: [], timeOfDay: 'morning', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), recordedBy: 'Caregiver' },
-    { id: `${patientId}-me2`, patientId, mood: 'happy', intensity: 8, note: 'Laughed during music time', triggers: [], timeOfDay: 'afternoon', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), recordedBy: 'Caregiver' },
+    { id: `${patientId}-me1`, patientId, mood: 'calm', intensity: 7, note: 'Enjoyed looking at photo album', triggers: [], timeOfDay: 'morning', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), recordedBy: 'Patient Care Coordinator' },
+    { id: `${patientId}-me2`, patientId, mood: 'happy', intensity: 8, note: 'Laughed during music time', triggers: [], timeOfDay: 'afternoon', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), recordedBy: 'Patient Care Coordinator' },
   ];
 
   const behaviorLogs: BehaviorLog[] = [
-    { id: `${patientId}-bl1`, patientId, behavior: 'Repetitive questioning', description: 'Asked where family was multiple times', severity: 'mild', triggers: ['evening'], interventions: ['Validation', 'Distraction'], outcome: 'Calmed after 10 minutes', duration: 15, timeOfDay: 'evening', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), recordedBy: 'Caregiver' },
+    { id: `${patientId}-bl1`, patientId, behavior: 'Repetitive questioning', description: 'Asked where family was multiple times', severity: 'mild', triggers: ['evening'], interventions: ['Validation', 'Distraction'], outcome: 'Calmed after 10 minutes', duration: 15, timeOfDay: 'evening', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), recordedBy: 'Patient Care Coordinator' },
   ];
 
   const memories: Memory[] = [
-    { id: `${patientId}-mem1`, patientId, title: 'Wedding Day', description: 'Special day with family', photoUrl: '/images/memory_photo_1.jpg', date: '1965-06-12', people: ['Spouse'], category: 'photo', tags: ['wedding', 'family'], isFavorite: true, createdAt: new Date().toISOString(), createdBy: 'Caregiver' },
-    { id: `${patientId}-mem2`, patientId, title: 'Family Vacation', description: 'Summer vacation with the children', photoUrl: '/images/memory_photo_2.jpg', date: '1978-07-15', location: 'Lake Tahoe', people: ['Family'], category: 'photo', tags: ['vacation', 'family'], isFavorite: true, createdAt: new Date().toISOString(), createdBy: 'Caregiver' },
+    { id: `${patientId}-mem1`, patientId, title: 'Wedding Day', description: 'Special day with family', photoUrl: '/images/memory_photo_1.jpg', date: '1965-06-12', people: ['Spouse'], category: 'photo', tags: ['wedding', 'family'], isFavorite: true, createdAt: new Date().toISOString(), createdBy: 'Patient Care Coordinator' },
+    { id: `${patientId}-mem2`, patientId, title: 'Family Vacation', description: 'Summer vacation with the children', photoUrl: '/images/memory_photo_2.jpg', date: '1978-07-15', location: 'Lake Tahoe', people: ['Family'], category: 'photo', tags: ['vacation', 'family'], isFavorite: true, createdAt: new Date().toISOString(), createdBy: 'Patient Care Coordinator' },
   ];
 
   const careTeam: CareTeamMember[] = [
@@ -353,8 +353,8 @@ function generatePatientData(patientId: string, patientInfo: Partial<Patient>): 
   ];
 
   const reminders: Reminder[] = [
-    { id: `${patientId}-r1`, patientId, title: 'Morning Medication', message: 'Time to take morning medications', type: 'medication', time: '08:30', daysOfWeek: [0,1,2,3,4,5,6], isActive: true, sound: 'gentle', vibrate: true, createdAt: new Date().toISOString(), createdBy: 'Caregiver' },
-    { id: `${patientId}-r2`, patientId, title: 'Afternoon Medication', message: 'Time to take afternoon medications', type: 'medication', time: '14:00', daysOfWeek: [0,1,2,3,4,5,6], isActive: true, sound: 'gentle', vibrate: true, createdAt: new Date().toISOString(), createdBy: 'Caregiver' },
+    { id: `${patientId}-r1`, patientId, title: 'Morning Medication', message: 'Time to take morning medications', type: 'medication', time: '08:30', daysOfWeek: [0,1,2,3,4,5,6], isActive: true, sound: 'gentle', vibrate: true, createdAt: new Date().toISOString(), createdBy: 'Patient Care Coordinator' },
+    { id: `${patientId}-r2`, patientId, title: 'Afternoon Medication', message: 'Time to take afternoon medications', type: 'medication', time: '14:00', daysOfWeek: [0,1,2,3,4,5,6], isActive: true, sound: 'gentle', vibrate: true, createdAt: new Date().toISOString(), createdBy: 'Patient Care Coordinator' },
   ];
 
   const appointments: Appointment[] = [
@@ -387,7 +387,7 @@ function generatePatientData(patientId: string, patientInfo: Partial<Patient>): 
   ];
 
   const nutritionLogs: NutritionLog[] = [
-    { id: `${patientId}-nl1`, patientId, date: new Date().toISOString().split('T')[0], mealsEaten: 2, mealsTotal: 3, fluidIntakeOz: 32, appetite: 'fair', notes: 'Ate well at breakfast', loggedBy: 'Caregiver' },
+    { id: `${patientId}-nl1`, patientId, date: new Date().toISOString().split('T')[0], mealsEaten: 2, mealsTotal: 3, fluidIntakeOz: 32, appetite: 'fair', notes: 'Ate well at breakfast', loggedBy: 'Patient Care Coordinator' },
   ];
 
   return {
@@ -490,9 +490,9 @@ export function initializeMockData(dispatch: Dispatch<Action>) {
   ];
   dispatch({ type: 'SET_ACTIVITIES', payload: mockActivities });
 
-  // Mock Caregiver Status
+  // Mock Patient Care Coordinator Status
   const mockCaregiverStatus: CaregiverStatus = {
-    caregiverId: 'cg1',
+    patientCareCoordinatorId: 'cg1',
     patientId: 'p1',
     stressLevel: 'medium',
     lastRespiteBreak: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
@@ -504,7 +504,7 @@ export function initializeMockData(dispatch: Dispatch<Action>) {
     burnoutRisk: 'moderate',
     recommendedActions: [
       'Schedule weekly respite care',
-      'Connect with local caregiver support group',
+      'Connect with local patient care coordinator support group',
       'Consider adult day program 2x per week',
       'Review sleep strategies with care team',
     ],

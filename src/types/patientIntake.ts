@@ -27,7 +27,7 @@ export interface PatientIntakeFormData {
   doctorTherapistName?: string;
   doctorTherapistPhone?: string;
 
-  // Caregiver Information (snapshot)
+  // Patient Care Coordinator Information (snapshot)
   caregiverName?: string;
   caregiverRelationship?: string;
   caregiverPhone?: string;
@@ -96,16 +96,16 @@ export interface PatientIntakeDoctor {
 }
 
 /**
- * Caregiver info snapshot
+ * Patient Care Coordinator info snapshot
  * Read from v_patient_intake_caregiver view
  */
-export interface PatientIntakeCaregiver {
+export interface PatientIntakePatient Care Coordinator {
   intakeId: string;
   patientProfileId: string | null;
   caregiverProfileId: string | null;
-  caregiverName: string | null;
+  patientCareCoordinatorName: string | null;
   caregiverRelationship: string | null;
-  caregiverPhone: string | null;
+  patientCareCoordinatorPhone: string | null;
 }
 
 /**

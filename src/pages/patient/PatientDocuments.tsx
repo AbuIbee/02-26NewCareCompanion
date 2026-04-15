@@ -53,7 +53,7 @@ export default function PatientDocuments() {
         <Card className="p-8 text-center border-dashed border-2 border-soft-taupe">
           <FileText className="w-12 h-12 text-soft-taupe mx-auto mb-3" />
           <p className="text-medium-gray mb-2">No documents yet</p>
-          <p className="text-sm text-medium-gray">Your caregiver will add important documents here</p>
+          <p className="text-sm text-medium-gray">Your patient care coordinator will add important documents here</p>
         </Card>
       ) : (
         <div className="space-y-6">
@@ -116,7 +116,7 @@ export default function PatientDocuments() {
           <div>
             <h4 className="font-semibold text-charcoal mb-1">Need Help?</h4>
             <p className="text-sm text-medium-gray">
-              Ask your caregiver if you need to see a specific document. They can add or remove documents from the caregiver portal.
+              Ask your patient care coordinator if you need to see a specific document. They can add or remove documents from the patient care coordinator portal.
             </p>
           </div>
         </div>

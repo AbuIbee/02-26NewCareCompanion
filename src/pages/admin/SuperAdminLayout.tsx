@@ -23,7 +23,7 @@ interface SuperAdminRecord {
 
 interface SystemStats {
   total_users: number;
-  caregivers: number;
+  patientCareCoordinators: number;
   therapists: number;
   patients: number;
   admins: number;
@@ -63,7 +63,7 @@ export default function SuperAdminLayout() {
         const count = (role: string) => profiles.filter((p: any) => p.role === role).length;
         setStats({
           total_users: profiles.length,
-          caregivers:  count('caregiver'),
+          patientCareCoordinators:  count('caregiver'),
           therapists:  count('therapist'),
           patients:    count('patient'),
           admins:      count('admin'),
@@ -124,9 +124,9 @@ export default function SuperAdminLayout() {
   };
 
   const handleRevokeAdmin = async (userId: string, name: string) => {
-    if (!confirm(`Revoke admin access for ${name}? They will become a regular caregiver.`)) return;
+    if (!confirm(`Revoke admin access for ${name}? They will become a regular patient care coordinator.`)) return;
     try {
-      await supabase.from('profiles').update({ role: 'caregiver' }).eq('id', userId);
+      await supabase.from('profiles').update({ role: 'patient_care_coordinator' }).eq('id', userId);
       toast.success(`${name}'s admin access revoked`);
       loadAll();
     } catch (err: any) {
@@ -159,7 +159,7 @@ export default function SuperAdminLayout() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {stats && [
                 { label: 'Total Users',  value: stats.total_users,  color: 'bg-warm-bronze/10 text-warm-bronze' },
-                { label: 'Caregivers',   value: stats.caregivers,   color: 'bg-amber-100 text-amber-700' },
+                { label: 'Patient Care Coordinators',   value: stats.patientCareCoordinators,   color: 'bg-amber-100 text-amber-700' },
                 { label: 'Patients',     value: stats.patients,     color: 'bg-soft-sage/20 text-green-700' },
                 { label: 'Therapists',   value: stats.therapists,   color: 'bg-calm-blue/10 text-blue-700' },
                 { label: 'Admins',       value: stats.admins,       color: 'bg-deep-bronze/10 text-deep-bronze' },

@@ -106,7 +106,7 @@ const crisisTools: CrisisTool[] = [
       'Use written cues or memory aids if helpful',
       'Distract with an engaging activity',
       'Identify triggers (boredom, anxiety, unmet need)',
-      'Take breaks - this behavior is exhausting for caregivers',
+      'Take breaks - this behavior is exhausting for patient care coordinators',
       'Join a support group to share coping strategies',
     ],
   },
@@ -119,7 +119,7 @@ const emergencyContacts = [
   { name: 'Alzheimer\'s Helpline', number: '1-800-272-3900', type: 'support', description: '24/7 dementia support' },
 ];
 
-export default function CaregiverCrisisPrevention() {
+export default function PatientCareCoordinatorCrisisPrevention() {
   const { state } = useApp();
   const selectedPatient = useSelectedPatient();
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
@@ -386,7 +386,7 @@ export default function CaregiverCrisisPrevention() {
     </div>
   </div>
 )}
-      {/* Caregiver Self-Care Reminder */}
+      {/* Patient Care Coordinator Self-Care Reminder */}
       <div className="bg-gradient-to-r from-warm-bronze/10 to-warm-bronze/5 rounded-xl p-6 border border-warm-bronze/30">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-warm-bronze/20 rounded-full flex items-center justify-center flex-shrink-0">

@@ -1,8 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import type { Patient, PatientData } from '@/types';
 
-// ─── Get all patients for the logged-in caregiver ────────────────────────────
-export async function getCaregiverPatients(): Promise<PatientData[]> {
+// ─── Get all patients for the logged-in patient care coordinator ────────────────────────────
+export async function getPatientCareCoordinatorPatients(): Promise<PatientData[]> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return [];
 
@@ -88,7 +88,7 @@ export async function getPatientById(patientId: string): Promise<PatientData | n
 // ─── Create a new patient ─────────────────────────────────────────────────────
 export async function createPatient(
   patientData: Partial<Patient>,
-  caregiverId: string,
+  patientCareCoordinatorId: string,
   relationship?: string
 ): Promise<Patient> {
   // Use caregiver-provided temp password, or auto-generate one
@@ -141,7 +141,7 @@ export async function createPatient(
     .select().single();
   if (patientError || !patient) throw new Error(`Failed to create patient record: ${patientError?.message}`);
 
-  // 4. Link caregiver to patient
+  // 4. Link patient care coordinator to patient
   const { error: relError } = await supabase
     .from('caregiver_patients')
     .insert({
@@ -174,7 +174,7 @@ export async function createPatient(
 export async function assignTherapistToPatient(
   patientId: string,
   therapistId: string,
-  caregiverId: string
+  patientCareCoordinatorId: string
 ): Promise<void> {
   // Check if relationship already exists
   const { data: existing } = await supabase
@@ -408,8 +408,8 @@ async function loadPatientData(patient: Patient): Promise<PatientData> {
     },
     alerts: [], safetyAlerts: [], adlAssessments: [], nutritionLogs: [],
     notes: (notes || []).map((n: any) => ({
-      id: n.id, patientId: n.patient_id, caregiverId: n.author_id,
-      caregiverName: 'Unknown', note: n.note, noteType: n.note_type, createdAt: n.created_at,
+      id: n.id, patientId: n.patient_id, patientCareCoordinatorId: n.author_id,
+      patientCareCoordinatorName: 'Unknown', note: n.note, noteType: n.note_type, createdAt: n.created_at,
     })),
   };
 }
@@ -426,8 +426,8 @@ export async function getPatientNotes(patientId: string): Promise<any[]> {
   return (data || []).map((n: any) => ({
     id:            n.id,
     patientId:     n.patient_id,
-    caregiverId:   n.author_id,
-    caregiverName: n.author_name || 'Unknown',
+    patientCareCoordinatorId:   n.author_id,
+    patientCareCoordinatorName: n.author_name || 'Unknown',
     note:          n.note,
     noteType:      n.note_type,
     createdAt:     n.created_at,
@@ -455,7 +455,7 @@ export async function addPatientNote(
   return {
     id:          data.id,
     patientId:   data.patient_id,
-    caregiverId: data.author_id,
+    patientCareCoordinatorId: data.author_id,
     note:        data.note,
     noteType:    data.note_type,
     createdAt:   data.created_at,

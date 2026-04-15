@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { Medication } from '@/types';
 
-export default function CaregiverMedications() {
+export default function PatientCareCoordinatorMedications() {
   const { state, dispatch } = useApp();
   const selectedPatient = useSelectedPatient();
   
@@ -36,7 +36,7 @@ export default function CaregiverMedications() {
         scheduledTime: medication.schedule[0]?.time || '',
         takenTime: status === 'taken' ? new Date().toISOString() : undefined,
         status,
-        recordedBy: state.currentUser?.firstName || 'Caregiver',
+        recordedBy: state.currentUser?.firstName || 'Patient Care Coordinator',
         date: new Date().toISOString().split('T')[0],
       };
       dispatch({ type: 'ADD_MEDICATION_LOG', payload: newLog });

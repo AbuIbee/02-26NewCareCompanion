@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/store/AppContext';
 import { useAllPatients, useSelectedPatient } from '@/hooks/useSelectedPatient';
-import { getCaregiverPatients } from '@/services/patientService';
+import { getPatientCareCoordinatorPatients } from '@/services/patientService';
 import { supabase } from '@/lib/supabase';
-import CaregiverDashboard from './CaregiverDashboard';
-import CaregiverMedications from './CaregiverMedications';
-import CaregiverHealth from './CaregiverHealth';
-import CaregiverMood from './CaregiverMood';
-import CaregiverMemories from './CaregiverMemories';
-import CaregiverDocuments from './CaregiverDocuments';
-import CaregiverReminders from './CaregiverReminders';
-import CaregiverProfile from './CaregiverProfile';
-import CaregiverCrisisPrevention from './CaregiverCrisisPrevention';
+import PatientCareCoordinatorDashboard from './PatientCareCoordinatorDashboard';
+import PatientCareCoordinatorMedications from './PatientCareCoordinatorMedications';
+import PatientCareCoordinatorHealth from './PatientCareCoordinatorHealth';
+import PatientCareCoordinatorMood from './PatientCareCoordinatorMood';
+import PatientCareCoordinatorMemories from './PatientCareCoordinatorMemories';
+import PatientCareCoordinatorDocuments from './PatientCareCoordinatorDocuments';
+import PatientCareCoordinatorReminders from './PatientCareCoordinatorReminders';
+import PatientCareCoordinatorProfile from './PatientCareCoordinatorProfile';
+import PatientCareCoordinatorCrisisPrevention from './PatientCareCoordinatorCrisisPrevention';
 import MultiPatientDashboard from './MultiPatientDashboard';
 import AddPatientPage from './AddPatientPage';
 import PatientTimeline from './PatientTimeline';
@@ -37,7 +37,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
-type CaregiverView =
+type PatientCareCoordinatorView =
   | 'dashboard'
   | 'medications'
   | 'routines'
@@ -50,8 +50,8 @@ type CaregiverView =
   | 'addPatient'
   | 'myportal';
 
-export default function CaregiverLayout() {
-  const [currentView, setCurrentView] = useState<CaregiverView>('dashboard');
+export default function PatientCareCoordinatorLayout() {
+  const [currentView, setCurrentView] = useState<PatientCareCoordinatorView>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showPatientDropdown, setShowPatientDropdown] = useState(false);
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
@@ -74,7 +74,7 @@ export default function CaregiverLayout() {
       
       setIsLoadingPatients(true);
       try {
-        const patients = await getCaregiverPatients();
+        const patients = await getPatientCareCoordinatorPatients();
         if (isMounted) {
           dispatch({ type: 'SET_PATIENTS', payload: patients });
           
@@ -116,16 +116,16 @@ export default function CaregiverLayout() {
   }, [dispatch, state.selectedPatientId]);
 
   const navItems = [
-    { id: 'dashboard' as CaregiverView, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'medications' as CaregiverView, label: 'Medications', icon: Pill },
-    { id: 'routines' as CaregiverView, label: 'Routines', icon: Calendar },
-    { id: 'memories' as CaregiverView, label: 'Memories', icon: BookOpen },
-    { id: 'mood' as CaregiverView, label: 'Mood Tracker', icon: Heart },
-    { id: 'documents' as CaregiverView, label: 'Documents', icon: FileText },
-    { id: 'reminders' as CaregiverView, label: 'Reminders', icon: Bell },
-    { id: 'crisis' as CaregiverView, label: 'Crisis Prevention', icon: AlertTriangle },
-    { id: 'timeline' as CaregiverView, label: 'Timeline', icon: Clock },
-    { id: 'myportal' as CaregiverView, label: 'My Portal', icon: User },
+    { id: 'dashboard' as PatientCareCoordinatorView, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'medications' as PatientCareCoordinatorView, label: 'Medications', icon: Pill },
+    { id: 'routines' as PatientCareCoordinatorView, label: 'Routines', icon: Calendar },
+    { id: 'memories' as PatientCareCoordinatorView, label: 'Memories', icon: BookOpen },
+    { id: 'mood' as PatientCareCoordinatorView, label: 'Mood Tracker', icon: Heart },
+    { id: 'documents' as PatientCareCoordinatorView, label: 'Documents', icon: FileText },
+    { id: 'reminders' as PatientCareCoordinatorView, label: 'Reminders', icon: Bell },
+    { id: 'crisis' as PatientCareCoordinatorView, label: 'Crisis Prevention', icon: AlertTriangle },
+    { id: 'timeline' as PatientCareCoordinatorView, label: 'Timeline', icon: Clock },
+    { id: 'myportal' as PatientCareCoordinatorView, label: 'My Portal', icon: User },
   ];
 
   const handlePatientSelect = (patientId: string | null) => {
@@ -143,7 +143,7 @@ export default function CaregiverLayout() {
     // Reload patients from Supabase
     setIsLoadingPatients(true);
     try {
-      const patients = await getCaregiverPatients();
+      const patients = await getPatientCareCoordinatorPatients();
       dispatch({ type: 'SET_PATIENTS', payload: patients });
       setCurrentView('dashboard');
     } catch (error) {
@@ -179,27 +179,27 @@ export default function CaregiverLayout() {
 
     switch (currentView) {
       case 'dashboard':
-        return <CaregiverDashboard />;
+        return <PatientCareCoordinatorDashboard />;
       case 'medications':
-        return <CaregiverMedications />;
+        return <PatientCareCoordinatorMedications />;
       case 'routines':
-        return <CaregiverHealth />;
+        return <PatientCareCoordinatorHealth />;
       case 'mood':
-        return <CaregiverMood />;
+        return <PatientCareCoordinatorMood />;
       case 'memories':
-        return <CaregiverMemories />;
+        return <PatientCareCoordinatorMemories />;
       case 'documents':
-        return <CaregiverDocuments />;
+        return <PatientCareCoordinatorDocuments />;
       case 'reminders':
-        return <CaregiverReminders />;
+        return <PatientCareCoordinatorReminders />;
       case 'crisis':
-        return <CaregiverCrisisPrevention />;
+        return <PatientCareCoordinatorCrisisPrevention />;
       case 'timeline':
         return <PatientTimeline />;
       case 'myportal':
-        return <CaregiverProfile />;
+        return <PatientCareCoordinatorProfile />;
       default:
-        return <CaregiverDashboard />;
+        return <PatientCareCoordinatorDashboard />;
     }
   };
 
@@ -452,7 +452,7 @@ export default function CaregiverLayout() {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="font-medium text-charcoal">{state.currentUser?.firstName} {state.currentUser?.lastName}</p>
-              <p className="text-sm text-medium-gray">Caregiver</p>
+              <p className="text-sm text-medium-gray">Patient Care Coordinator</p>
             </div>
 
             {selectedPatientAlerts > 0 && (

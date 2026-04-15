@@ -8,7 +8,7 @@ import PatientMedications from './PatientMedications';
 import PatientDocuments from './PatientDocuments';
 import PatientReminders from './PatientReminders';
 import PatientMoodTracker from './PatientMoodTracker';
-import CaregiverCheckin from './CaregiverCheckin';
+import CarePartnerCheckin from './CarePartnerCheckin';
 import PatientProfileSetup from './PatientProfileSetup';
 import PatientEmergencyContacts from './PatientEmergencyContacts';
 import PatientGames from './PatientGames';
@@ -38,19 +38,8 @@ type PatientView =
   | 'media'
   | 'games';
 
-type GameId =
-  | 'matching'
-  | 'crossword'
-  | 'checkers'
-  | 'chess'
-  | 'wordsearch'
-  | 'solitaire'
-  | 'hangman'
-  | 'brainapps';
-
 export default function PatientLayout() {
   const [currentView, setCurrentView] = useState<PatientView>('dashboard');
-  const [selectedGame, setSelectedGame] = useState<GameId>('matching');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -266,77 +255,58 @@ export default function PatientLayout() {
     toast('You have been logged out');
   };
 
-  const handleNavigateToGame = (gameId: string) => {
-    setSelectedGame(gameId as GameId);
-    setCurrentView('games');
-};
-
   const navItems = [
-    { id: 'emergency_contacts' as PatientView, label: 'Emergency Contacts',  icon: Phone },
     { id: 'dashboard'          as PatientView, label: 'Home',                icon: LayoutDashboard },
-    { id: 'intake'             as PatientView, label: 'Patient Information',  icon: ClipboardPlus },
+    { id: 'checkin'            as PatientView, label: 'Care Partner',         icon: ClipboardList },
+    { id: 'intake'             as PatientView, label: 'Patient Intake Form',  icon: ClipboardPlus },
+    { id: 'emergency_contacts' as PatientView, label: 'Emergency Contacts',   icon: Phone },
     { id: 'memories'           as PatientView, label: 'Family',               icon: Users },
     { id: 'mood'               as PatientView, label: 'How I Feel',           icon: Smile },
     { id: 'reminders'          as PatientView, label: 'Reminders',            icon: Bell },
   ];
 
   const moreNavItems = [
-    { id: 'checkin'   as PatientView, label: 'Caregiver', icon: ClipboardList },
-    { id: 'documents' as PatientView, label: 'Papers',       icon: FileText },
+    { id: 'medications' as PatientView, label: 'Medications',    icon: Pill },
+    { id: 'routines'    as PatientView, label: 'My Day',         icon: Calendar },
+    { id: 'documents'   as PatientView, label: 'Papers',         icon: FileText },
+    { id: 'media'       as PatientView, label: 'Videos & Media', icon: Film },
+    { id: 'games'       as PatientView, label: 'Memory Games',   icon: Gamepad2 },
   ];
 
   const allNavItems = [...navItems, ...moreNavItems];
 
-const renderView = () => {
-  switch (currentView) {
-    case 'dashboard':
-      return <PatientHome onNavigateToGame={handleNavigateToGame} />;
-
-    case 'medications':
-      return <PatientMedications />;
-
-    case 'routines':
-      return <PatientRoutine />;
-
-    case 'memories':
-      return <PatientMemories />;
-
-    case 'mood':
-      return <PatientMoodTracker />;
-
-    case 'documents':
-      return <PatientDocuments />;
-
-    case 'reminders':
-      return <PatientReminders />;
-
-    case 'checkin':
-      return <CaregiverCheckin />;
-
-    case 'intake':
-      return <PatientIntakeForm onCompleted={() => setIntakeCompleted(true)} />;
-
-    case 'emergency_contacts':
-      return <PatientEmergencyContacts />;
-
-    case 'careteam':
-      return <PatientCareTeam />;
-
-    case 'media':
-      return <MediaUploader readOnly={false} patientId={state.currentUser?.id} />;
-
-    case 'games':
-      return (
-        <PatientGames
-          initialGame={selectedGame}
-          onNavigateHome={() => setCurrentView('dashboard')}
-        />
-      );
-
-    default:
-      return <PatientHome onNavigateToGame={handleNavigateToGame} />;
-  }
-};
+  const renderView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return <PatientHome />;
+      case 'medications':
+        return <PatientMedications />;
+      case 'routines':
+        return <PatientRoutine />;
+      case 'memories':
+        return <PatientMemories />;
+      case 'mood':
+        return <PatientMoodTracker />;
+      case 'documents':
+        return <PatientDocuments />;
+      case 'reminders':
+        return <PatientReminders />;
+      case 'checkin':
+        return <CarePartnerCheckin />;
+      case 'intake':
+        return <PatientIntakeForm onCompleted={() => setIntakeCompleted(true)} />;
+      case 'emergency_contacts':
+        return <PatientEmergencyContacts />;
+      case 'careteam':
+        return <PatientCareTeam />;
+      case 'media':
+        return <MediaUploader readOnly={false} patientId={state.currentUser?.id} />;
+      case 'games':
+        return <PatientGames />;
+      default:
+        return <PatientHome />;
+    }
+  };
 
   const playSafetyMessage = () => {
     setIsPlaying(true);
@@ -376,7 +346,7 @@ const renderView = () => {
           <div className="w-10 h-10 bg-warm-bronze rounded-xl flex items-center justify-center flex-shrink-0">
             <Heart className="w-6 h-6 text-white" />
           </div>
-          {!sidebarCollapsed && <span className="ml-3 font-semibold text-charcoal">Memoria Helps</span>}
+          {!sidebarCollapsed && <span className="ml-3 font-semibold text-charcoal">My Memoria Ally</span>}
         </div>
 
         {!sidebarCollapsed && (

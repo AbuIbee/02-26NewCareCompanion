@@ -54,7 +54,7 @@ export async function createAndProvisionPatient(
 
   if (intakeError || !intakeRow) {
     const msg = intakeError?.message?.includes('row-level security')
-      ? 'Permission denied. Make sure you are logged in as a caregiver.'
+      ? 'Permission denied. Make sure you are logged in as a patient care coordinator.'
       : intakeError?.message || 'Failed to save patient data.';
     return { patientProfileId: '', intakeId: '', error: new Error(msg) };
   }
@@ -106,7 +106,7 @@ export async function createAndProvisionPatient(
   return { patientProfileId, intakeId, error: null };
 }
 
-export async function createPatientIntake(formData: PatientIntakeFormData, caregiverId: string): Promise<{ intakeId: string; error: Error | null }> {
+export async function createPatientIntake(formData: PatientIntakeFormData, patientCareCoordinatorId: string): Promise<{ intakeId: string; error: Error | null }> {
   const { data: { user } } = await supabase.auth.getUser();
   const realId = user?.id ?? caregiverId;
   const { data, error } = await supabase.from('patient_intake').insert({
@@ -141,7 +141,7 @@ export async function getPatientIntakeByProfileId(patientProfileId: string): Pro
   return transformDbToPatientIntake(data);
 }
 
-export async function getCaregiverIntakes(caregiverId: string): Promise<PatientIntake[]> {
+export async function getCaregiverIntakes(patientCareCoordinatorId: string): Promise<PatientIntake[]> {
   const { data, error } = await supabase.from('patient_intake').select('*').eq('caregiver_profile_id', caregiverId).order('created_at', { ascending: false });
   if (error) return [];
   return (data || []).map(transformDbToPatientIntake);
@@ -175,8 +175,8 @@ function transformDbToPatientIntake(data: any): PatientIntake {
     patientState: data.patient_state, patientZipCode: data.patient_zip_code,
     patientPhone: data.patient_phone, patientEmail: data.patient_email,
     preferredHospital: data.preferred_hospital, doctorTherapistName: data.doctor_therapist_name,
-    doctorTherapistPhone: data.doctor_therapist_phone, caregiverName: data.caregiver_name,
-    caregiverRelationship: data.caregiver_relationship, caregiverPhone: data.caregiver_phone,
+    doctorTherapistPhone: data.doctor_therapist_phone, patientCareCoordinatorName: data.caregiver_name,
+    caregiverRelationship: data.caregiver_relationship, patientCareCoordinatorPhone: data.caregiver_phone,
     medicationsAndDosage: data.medications_and_dosage, emergencyContactFullName: data.emergency_contact_full_name,
     emergencyContactPhone: data.emergency_contact_phone, emergencyContactEmail: data.emergency_contact_email,
     emergencyContactRelationship: data.emergency_contact_relationship,

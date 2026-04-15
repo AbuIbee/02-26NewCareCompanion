@@ -3,7 +3,7 @@ import { AppProvider, useApp, initializeMockData } from '@/store/AppContext';
 import LandingPage from '@/pages/common/LandingPage';
 import LoginPage from '@/pages/common/LoginPage';
 import PatientLayout from '@/pages/patient/PatientLayout';
-import CaregiverLayout from '@/pages/caregiver/CaregiverLayout';
+import PatientCareCoordinatorLayout from '@/pages/caregiver/PatientCareCoordinatorLayout';
 import TherapistLayout from '@/pages/therapist/TherapistLayout';
 import { Toaster } from '@/components/ui/sonner';
 import { useEffect } from 'react';
@@ -27,8 +27,8 @@ function AppContent() {
     switch (state.selectedRole) {
       case 'patient':
         return <PatientLayout />;
-      case 'caregiver':
-        return <CaregiverLayout />;
+      case 'patient_care_coordinator':
+        return <PatientCareCoordinatorLayout />;
       case 'therapist':
         return <TherapistLayout />;
       default:

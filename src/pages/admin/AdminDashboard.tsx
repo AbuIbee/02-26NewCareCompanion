@@ -4,7 +4,7 @@ import { Users, UserCheck, Clock, ShieldCheck, Activity, TrendingUp, AlertTriang
 import { motion } from 'framer-motion';
 
 interface AdminStats {
-  totalCaregivers: number;
+  totalPatientCareCoordinators: number;
   totalPatients: number;
   totalTherapists: number;
   pendingApprovals: number;
@@ -12,7 +12,7 @@ interface AdminStats {
 }
 
 export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => void }) {
-  const [stats, setStats] = useState<AdminStats>({ totalCaregivers: 0, totalPatients: 0, totalTherapists: 0, pendingApprovals: 0, newUsersThisWeek: 0 });
+  const [stats, setStats] = useState<AdminStats>({ totalPatientCareCoordinators: 0, totalPatients: 0, totalTherapists: 0, pendingApprovals: 0, newUsersThisWeek: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +20,7 @@ export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => v
 
   const loadStats = async () => {
     try {
-      const [caregivers, patients, therapists, pending, recent] = await Promise.all([
+      const [patientCareCoordinators, patients, therapists, pending, recent] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'caregiver'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'patient'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'therapist'),
@@ -33,7 +33,7 @@ export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => v
       const { count: weekCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', oneWeekAgo.toISOString());
 
       setStats({
-        totalCaregivers: caregivers.count || 0,
+        totalPatientCareCoordinators: patientCareCoordinators.count || 0,
         totalPatients: patients.count || 0,
         totalTherapists: therapists.count || 0,
         pendingApprovals: pending.count || 0,
@@ -49,7 +49,7 @@ export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => v
 
   const roleColor = (role: string) => {
     switch (role) {
-      case 'caregiver': return 'bg-warm-bronze/10 text-warm-bronze';
+      case 'patient_care_coordinator': return 'bg-warm-bronze/10 text-warm-bronze';
       case 'patient':   return 'bg-soft-sage/20 text-soft-sage';
       case 'therapist': return 'bg-calm-blue/20 text-calm-blue';
       case 'admin':     return 'bg-deep-bronze/10 text-deep-bronze';
@@ -58,9 +58,9 @@ export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => v
   };
 
   const statCards = [
-    { label: 'Total Caregivers', value: stats.totalCaregivers, icon: UserCheck, color: 'bg-warm-bronze/10', iconColor: 'text-warm-bronze', action: () => onNavigate('caregivers') },
+    { label: 'Total Patient Care Coordinators', value: stats.totalPatientCareCoordinators, icon: UserCheck, color: 'bg-warm-bronze/10', iconColor: 'text-warm-bronze', action: () => onNavigate('patientCareCoordinators') },
     { label: 'Total Patients',   value: stats.totalPatients,   icon: Users,     color: 'bg-soft-sage/10',   iconColor: 'text-soft-sage',   action: () => onNavigate('patients') },
-    { label: 'Therapists',       value: stats.totalTherapists, icon: Activity,  color: 'bg-calm-blue/10',   iconColor: 'text-calm-blue',   action: () => onNavigate('caregivers') },
+    { label: 'Therapists',       value: stats.totalTherapists, icon: Activity,  color: 'bg-calm-blue/10',   iconColor: 'text-calm-blue',   action: () => onNavigate('patientCareCoordinators') },
     { label: 'Pending Approvals',value: stats.pendingApprovals,icon: Clock,     color: stats.pendingApprovals > 0 ? 'bg-amber-100' : 'bg-soft-taupe/20', iconColor: stats.pendingApprovals > 0 ? 'text-amber-600' : 'text-medium-gray', action: () => onNavigate('pending') },
     { label: 'New This Week',    value: stats.newUsersThisWeek,icon: TrendingUp, color: 'bg-deep-bronze/10', iconColor: 'text-deep-bronze', action: null },
   ];
@@ -124,7 +124,7 @@ export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => v
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Pending Approvals', icon: Clock,      color: 'bg-amber-500',    view: 'pending'    },
-            { label: 'Manage Caregivers', icon: UserCheck,  color: 'bg-warm-bronze',  view: 'caregivers' },
+            { label: 'Manage Patient Care Coordinators', icon: UserCheck,  color: 'bg-warm-bronze',  view: 'patientCareCoordinators' },
             { label: 'View All Patients', icon: Users,      color: 'bg-soft-sage',    view: 'patients'   },
             { label: 'Audit Log',         icon: ShieldCheck,color: 'bg-deep-bronze',  view: 'audit'      },
           ].map((action) => {
@@ -144,7 +144,7 @@ export function AdminDashboard({ onNavigate }: { onNavigate: (view: string) => v
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-charcoal">Recently Joined Users</h3>
-          <button onClick={() => onNavigate('caregivers')} className="text-sm text-warm-bronze hover:text-deep-bronze font-medium">View all →</button>
+          <button onClick={() => onNavigate('patientCareCoordinators')} className="text-sm text-warm-bronze hover:text-deep-bronze font-medium">View all →</button>
         </div>
         <div className="bg-white rounded-2xl border border-soft-taupe overflow-hidden">
           {recentUsers.length === 0 ? (

@@ -66,7 +66,7 @@ export default function LandingPage() {
                 <span className="text-warm-bronze">every moment</span>
               </h1>
               <p className="text-lg text-medium-gray mb-8 max-w-lg">
-                A comprehensive dementia care platform supporting patients, caregivers, 
+                A comprehensive dementia care platform supporting patients, patientCareCoordinators, 
                 and therapists with dignity, connection, and peace of mind.
               </p>
               <div className="flex flex-wrap gap-4">
@@ -173,7 +173,7 @@ export default function LandingPage() {
                 color: 'bg-soft-sage',
               },
               {
-                title: 'Caregiver Portal',
+                title: 'Patient Care Coordinator Portal',
                 description: 'Comprehensive tools for managing care with confidence',
                 features: ['Medication tracking', 'Health monitoring', 'Mood analysis', 'Care team'],
                 color: 'bg-warm-bronze',
@@ -297,7 +297,7 @@ export default function LandingPage() {
               <div className="flex items-center justify-center gap-3 px-8 py-4 bg-soft-taupe/20 flex-shrink-0">
                 {[
                   { label: 'Patient Portal',   color: 'bg-soft-sage'    },
-                  { label: 'Caregiver Portal', color: 'bg-warm-bronze'  },
+                  { label: 'Patient Care Coordinator Portal', color: 'bg-warm-bronze'  },
                   { label: 'Therapist Portal', color: 'bg-calm-blue'    },
                 ].map((p, i) => (
                   <button key={i} onClick={() => setLearnMorePage(i)}
@@ -346,14 +346,14 @@ export default function LandingPage() {
                               why: 'Memory loss causes patients to struggle recognising loved ones. This is a safe, private digital memory book — patients can look up who someone is without embarrassment.',
                               what: 'Photos, names, relationships, and stories of family members stored as a personal reference.' },
                             { icon: Heart,         title: 'How I Feel',     color: 'bg-gentle-coral/10 text-gentle-coral',
-                              why: 'Patients with cognitive decline often cannot verbally communicate how they feel. This gives them a simple, dignified way to express emotions so caregivers can respond proactively.',
+                              why: 'Patients with cognitive decline often cannot verbally communicate how they feel. This gives them a simple, dignified way to express emotions so patient care coordinators can respond proactively.',
                               what: 'Emotional check-in tool to log current feelings — happy, sad, scared, or confused.' },
                             { icon: Bell,          title: 'Reminders',      color: 'bg-amber-100 text-amber-700',
-                              why: 'Memory impairment makes self-managing a daily routine nearly impossible. Reminders serve as a gentle, non-judgmental external memory — reducing patient frustration and caregiver burden.',
+                              why: 'Memory impairment makes self-managing a daily routine nearly impossible. Reminders serve as a gentle, non-judgmental external memory — reducing patient frustration and patient care coordinator burden.',
                               what: 'Scheduled alerts for daily tasks, appointments, medications, and activities.' },
                             { icon: ClipboardList, title: 'Caregiver',   color: 'bg-soft-sage/20 text-green-700',
-                              why: 'Patients benefit greatly from knowing exactly who is looking after them. Reduces anxiety by giving direct access to contact their care partner and feel less alone.',
-                              what: 'Direct connection to the primary caregiver — contact info, check-in history, and care partner notes.' },
+                              why: 'Patients benefit greatly from knowing exactly who is looking after them. Reduces anxiety by giving direct access to contact their caregiver and feel less alone.',
+                              what: 'Direct connection to the primary patient care coordinator — contact info, check-in history, and caregiver notes.' },
                             { icon: UserCheck,     title: 'My Care Team',   color: 'bg-warm-bronze/10 text-warm-bronze',
                               why: 'Knowing who to call and why can be the difference between getting help and suffering in silence. Consolidates the full support network with clear roles.',
                               what: 'Directory of all care professionals — doctors, nurses, therapists, social workers.' },
@@ -392,23 +392,23 @@ export default function LandingPage() {
                           <div className="w-16 h-16 bg-warm-bronze/10 rounded-2xl flex items-center justify-center mx-auto">
                             <Users className="w-8 h-8 text-warm-bronze" />
                           </div>
-                          <h2 className="text-3xl font-bold text-charcoal">Caregiver Portal</h2>
+                          <h2 className="text-3xl font-bold text-charcoal">Patient Care Coordinator Portal</h2>
                           <p className="text-medium-gray max-w-xl mx-auto">
                             Built around three principles: <strong>Remote Visibility</strong>, <strong>Proactive Care</strong>, and <strong>Team Coordination.</strong>
-                            Transforms a caregiver from a reactive responder into an informed, empowered care manager.
+                            Transforms a patient care coordinator from a reactive responder into an informed, empowered care manager.
                           </p>
                         </div>
                         <div className="grid sm:grid-cols-2 gap-4">
                           {[
                             { icon: Home,          title: 'Dashboard',        color: 'bg-warm-bronze/10 text-warm-bronze',
                               what: 'Real-time snapshot of patient\'s daily status — tasks, medications, mood, sleep, upcoming appointments, Caregiver check-ins, and Quick Actions.',
-                              why: 'Caregivers can\'t be physically present 24/7. This gives an at-a-glance health summary the moment they log in, enabling faster response to issues without making phone calls.' },
+                              why: 'Patient Care Coordinators can\'t be physically present 24/7. This gives an at-a-glance health summary the moment they log in, enabling faster response to issues without making phone calls.' },
                             { icon: Pill,          title: 'Medications',      color: 'bg-calm-blue/10 text-blue-700',
                               what: 'Complete medication management hub — prescriptions, dosages, schedules, and adherence tracking with percentage monitoring.',
                               why: 'Medication errors are among the leading causes of hospitalisation for dementia patients. The 0% adherence warning immediately signals when intervention is needed.' },
                             { icon: Calendar,      title: 'Routines',         color: 'bg-soft-sage/20 text-green-700',
                               what: 'Tool for building and managing daily structured routines — morning rituals, meals, activities, hygiene, bedtime.',
-                              why: 'Routine is medically essential for dementia patients. Allows caregivers to design and monitor routines remotely so the patient\'s day follows a predictable, therapeutic pattern.' },
+                              why: 'Routine is medically essential for dementia patients. Allows patient care coordinators to design and monitor routines remotely so the patient\'s day follows a predictable, therapeutic pattern.' },
                             { icon: BookOpen,      title: 'Memories',         color: 'bg-amber-100 text-amber-700',
                               what: 'Digital memory book — upload photos, stories, life history, important people, and meaningful moments for the patient.',
                               why: 'Reminiscence therapy is a clinically recognised intervention that improves mood and reduces agitation. Helps new care team members quickly understand who the patient is as a person.' },
@@ -419,17 +419,17 @@ export default function LandingPage() {
                               what: 'Secure repository for medical records, insurance cards, advance directives, legal documents, and care plans.',
                               why: 'The right document at the wrong time is useless. Eliminates the panic of searching for paperwork during emergencies and ensures continuity of care.' },
                             { icon: Bell,          title: 'Reminders',        color: 'bg-calm-blue/10 text-blue-700',
-                              what: 'Scheduling and alert system for patient appointments, medications, and activities — plus caregiver task reminders.',
+                              what: 'Scheduling and alert system for patient appointments, medications, and activities — plus patient care coordinator task reminders.',
                               why: 'Caregiving involves managing massive time-sensitive responsibilities simultaneously. A shared organisational system ensures nothing falls through the cracks on either side.' },
                             { icon: AlertTriangle, title: 'Crisis Prevention', color: 'bg-gentle-coral/10 text-gentle-coral',
                               what: 'Safety planning tool with crisis protocols, emergency contacts, behavioural warning signs, and de-escalation strategies.',
-                              why: 'Dementia can lead to sudden, unpredictable crises — wandering, severe agitation, falls. A proactive safety net ensures any caregiver or first responder knows the right steps immediately.' },
+                              why: 'Dementia can lead to sudden, unpredictable crises — wandering, severe agitation, falls. A proactive safety net ensures any patient care coordinator or first responder knows the right steps immediately.' },
                             { icon: Clock,         title: 'Timeline',         color: 'bg-soft-sage/20 text-green-700',
                               what: 'Chronological activity log of everything in the patient\'s care — mood entries, medication logs, notes, check-ins, incidents, and milestones.',
                               why: 'Gives a complete, searchable care history — invaluable for doctor appointments, legal documentation, insurance purposes, and tracking disease progression.' },
                             { icon: Film,          title: 'Videos & Media',   color: 'bg-amber-100 text-amber-700',
                               what: 'Curated media library of videos, music, photos that can be shared with or accessed by the patient.',
-                              why: 'Music and video therapy are evidence-based tools for improving quality of life. Caregivers can provide therapeutic comfort remotely — a familiar song can de-escalate anxiety.' },
+                              why: 'Music and video therapy are evidence-based tools for improving quality of life. Patient Care Coordinators can provide therapeutic comfort remotely — a familiar song can de-escalate anxiety.' },
                           ].map(({ icon: Icon, title, color, what, why }) => (
                             <div key={title} className="bg-soft-taupe/10 rounded-2xl p-5 space-y-2 border border-soft-taupe/50">
                               <div className="flex items-center gap-3">
@@ -474,8 +474,8 @@ export default function LandingPage() {
                               what: 'Data analysis module aggregating behavioural patterns — agitation, wandering, sleep disruption, mood instability, refusal of care, and other BPSD episodes.',
                               why: 'Identifies triggers, patterns, and correlations — e.g. whether agitation spikes on certain days or after specific activities. Transforms behavioural management from guesswork into data-informed intervention.' },
                             { icon: Film,        title: 'Videos & Media',       color: 'bg-amber-100 text-amber-700',
-                              what: 'Media management for uploading and assigning therapeutic content — guided relaxation, cognitive stimulation videos, music therapy playlists, and caregiver training materials.',
-                              why: 'Music and reminiscence video therapy are among the most effective non-pharmacological interventions for dementia. Media can also train caregivers on communication and de-escalation techniques.' },
+                              what: 'Media management for uploading and assigning therapeutic content — guided relaxation, cognitive stimulation videos, music therapy playlists, and patient care coordinator training materials.',
+                              why: 'Music and reminiscence video therapy are among the most effective non-pharmacological interventions for dementia. Media can also train patient care coordinators on communication and de-escalation techniques.' },
                             { icon: ClipboardList, title: 'Caregiver Reports', color: 'bg-soft-sage/20 text-green-700',
                               what: 'Live feed of Caregiver daily check-in reports — 7 clinical sections covering ADLs, nutrition, continence, safety events, behaviour, mood, and symptoms.',
                               why: 'Gives the therapist daily clinical-grade observations from the home environment — the most valuable data point in community-based dementia care, normally unavailable outside a facility.' },

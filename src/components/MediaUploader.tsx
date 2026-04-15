@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface MediaUploaderProps {
   // If patientId passed directly (patient's own view), use it
-  // Otherwise falls back to selectedPatient from caregiver context
+  // Otherwise falls back to selectedPatient from patient care coordinator context
   patientId?: string;
   patientName?: string;
   readOnly?: boolean; // patient view: can see but maybe not delete others' uploads
@@ -78,7 +78,7 @@ export default function MediaUploader({ patientId, patientName, readOnly = false
 
     try {
       const uploaderName = `${state.currentUser.firstName} ${state.currentUser.lastName}`;
-      const uploaderRole = state.currentUser.role || 'caregiver';
+      const uploaderRole = state.currentUser.role || 'patient_care_coordinator';
       await uploadMedia(file, effectivePatientId, state.currentUser.id, uploaderRole, uploaderName, caption);
       clearInterval(timer);
       setUploadPct(100);

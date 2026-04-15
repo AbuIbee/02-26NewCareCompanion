@@ -1,6 +1,6 @@
 // CareCompanion - Comprehensive Type Definitions
 
-export type UserRole = 'patient' | 'caregiver' | 'therapist';
+export type UserRole = 'patient' | 'patient_care_coordinator' | 'therapist';
 
 export interface User {
   id: string;
@@ -337,8 +337,8 @@ export interface DashboardStats {
 export interface Note {
   id: string;
   patientId: string;
-  caregiverId: string;
-  caregiverName: string;
+  patientCareCoordinatorId: string;
+  patientCareCoordinatorName: string;
   note: string;
   noteType: 'general' | 'medical' | 'behavior' | 'mood' | 'activity';
   createdAt: string;
@@ -428,7 +428,7 @@ export interface EducationModule {
 
 export interface WellnessCheckIn {
   id: string;
-  caregiverId: string;
+  patientCareCoordinatorId: string;
   stressLevel: number;
   sleepQuality: number;
   mood: string;
@@ -475,9 +475,9 @@ export interface ADLAssessment {
   notes?: string;
 }
 
-// Caregiver Status for Clinician Dashboard
+// Patient Care Coordinator Status for Clinician Dashboard
 export interface CaregiverStatus {
-  caregiverId: string;
+  patientCareCoordinatorId: string;
   patientId: string;
   stressLevel: 'low' | 'medium' | 'high';
   lastRespiteBreak: string;

@@ -41,7 +41,7 @@ const educationModules = [
   },
   {
     id: '4',
-    title: 'Caregiver Self-Care',
+    title: 'Patient Care Coordinator Self-Care',
     description: 'Importance of taking care of yourself while caring for others.',
     category: 'self_care',
     duration: 10,
@@ -51,7 +51,7 @@ const educationModules = [
   },
 ];
 
-export default function CaregiverEducation() {
+export default function PatientCareCoordinatorEducation() {
   const [selectedModule, setSelectedModule] = useState<typeof educationModules[0] | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -76,7 +76,7 @@ export default function CaregiverEducation() {
         transition={{ duration: 0.4 }}
       >
         <h2 className="text-2xl font-bold text-charcoal mb-1">Education</h2>
-        <p className="text-medium-gray">Learn and grow as a caregiver</p>
+        <p className="text-medium-gray">Learn and grow as a patient care coordinator</p>
       </motion.div>
 
       {/* Progress Overview */}
