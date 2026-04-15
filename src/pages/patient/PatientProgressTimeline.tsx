@@ -423,7 +423,7 @@ export default function PatientProgressTimeline() {
     const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
     setLoading(true);
     supabase
-      .from('care_partner_checkins')
+      .from('caregiver_checkins')
       .select('*')
       .eq('patient_id', patientId)
       .gte('check_in_date', since)

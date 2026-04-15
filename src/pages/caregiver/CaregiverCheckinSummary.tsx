@@ -1,5 +1,5 @@
 // Widget shown in Caregiver and Therapist dashboards
-// Displays the most recent Caregiver Daily Check-In for the selected patient
+// Displays the most recent Care Partner Daily Check-In for the selected patient
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ClipboardList, AlertCircle, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
@@ -10,7 +10,7 @@ interface CheckInSummaryProps {
   patientName: string;
 }
 
-export default function CaregiverCheckinSummary({ patientId, patientName }: CheckInSummaryProps) {
+export default function CarePartnerCheckinSummary({ patientId, patientName }: CheckInSummaryProps) {
   const [latest, setLatest]   = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen]       = useState(true);
@@ -21,7 +21,7 @@ export default function CaregiverCheckinSummary({ patientId, patientName }: Chec
     setLoading(true);
     try {
       const { data } = await supabase
-        .from('care_partner_checkins')
+        .from('caregiver_checkins')
         .select('*')
         .eq('patient_id', patientId)
         .order('check_in_date', { ascending: false })
@@ -74,7 +74,7 @@ export default function CaregiverCheckinSummary({ patientId, patientName }: Chec
             <ClipboardList className="w-4 h-4 text-warm-bronze" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-semibold text-charcoal">Caregiver Check-In</p>
+            <p className="text-sm font-semibold text-charcoal">Care Partner Check-In</p>
             <p className="text-xs text-medium-gray flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {isToday ? '✅ Today' : date} · by {latest.submitted_by_name}

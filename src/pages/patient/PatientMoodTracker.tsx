@@ -20,7 +20,8 @@ import {
   Shield,
   Brain,
   Heart,
-  ThumbsUp
+  ThumbsUp,
+  MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -64,6 +65,18 @@ const SCORE_MAP: Record<string, number> = {
   // Mood
   'Calm': 4, 'Anxious': 2, 'Depressed': 1, 'Irritable': 2, 'Elevated': 3, 'Labile': 1,
   'Normal (sleep)': 4, 'Slept too much': 2, 'Slept too little': 2, 'Day-night reversal': 0,
+
+  // Communication & Cognition
+  'Clear and normal': 4, 'Slightly slurred / slow': 3, 'Difficult to understand': 2,
+  'Mostly non-verbal': 1, 'Non-verbal / mute': 0,
+  'No difficulty': 4, 'Occasional difficulty': 3, 'Frequent pauses / substitutions': 2,
+  'Unable to find words': 0,
+  'Understands normally': 4, 'Understands simple sentences': 3, 'Understands single words only': 2,
+  'Minimal comprehension': 1,
+  'Follows without difficulty': 4, 'Needs repetition / cues': 3, 'Follows with step-by-step guidance': 2,
+  'Unable to follow directions': 0,
+  'Attentive and focused': 4, 'Mildly distracted': 3, 'Significantly distracted': 2,
+  'Unable to sustain attention': 0,
 };
 
 function getScore(value: string | null, defaultValue: number = 2): number {
@@ -109,6 +122,13 @@ interface CheckInData {
 
   // G - Symptoms
   sy_symptoms: string[];
+
+  // H - Communication & Cognition
+  cc_speech: string | null;
+  cc_comprehension: string | null;
+  cc_attention: string | null;
+  cc_following_directions: string | null;
+  cc_word_finding: string | null;
 }
 
 type FilterKey = '7d' | '1m' | '2m' | '3m' | '6m' | '1y';
@@ -239,6 +259,12 @@ const dates = useMemo(() => buildCalendarDates(filterKey), [filterKey]);
         return Math.max(0, 4 - Math.min(4, n));
       }
 
+      case 'cc_speech':               return c.cc_speech ? getScore(c.cc_speech) : null;
+      case 'cc_comprehension':        return c.cc_comprehension ? getScore(c.cc_comprehension) : null;
+      case 'cc_attention':            return c.cc_attention ? getScore(c.cc_attention) : null;
+      case 'cc_following_directions': return c.cc_following_directions ? getScore(c.cc_following_directions) : null;
+      case 'cc_word_finding':         return c.cc_word_finding ? getScore(c.cc_word_finding) : null;
+
       default:
         return null;
     }
@@ -259,14 +285,18 @@ const dates = useMemo(() => buildCalendarDates(filterKey), [filterKey]);
 
   const hasData = series.some(s => s.points.some(p => p.score !== null));
 
-  const PAD_L = 36;
-  const PAD_R = 16;
-  const PAD_T = 20;
-  const PAD_B = 32;
+  const PAD_L = 44;
+  const PAD_R = 20;
+  const PAD_T = 18;
+  const PAD_B = 36;
   const VB_W = 860;
-  const VB_H = 200;
+  const VB_H = 220;
   const CW = VB_W - PAD_L - PAD_R;
   const CH = VB_H - PAD_T - PAD_B;
+
+  // Y-axis: 0–4 scale, labels show descriptive text
+  const Y_TICKS = [0, 1, 2, 3, 4];
+  const Y_LABELS: Record<number, string> = { 0: 'Poor', 1: '', 2: 'Fair', 3: '', 4: 'Good' };
 
   const sy = (score: number) => PAD_T + CH - (score / 4) * CH;
   const sx = (i: number) =>
@@ -315,79 +345,85 @@ const dates = useMemo(() => buildCalendarDates(filterKey), [filterKey]);
           <svg
             viewBox={`0 0 ${VB_W} ${VB_H}`}
             className="w-full block overflow-visible"
-            style={{ height: 200 }}
+            style={{ height: 220 }}
             preserveAspectRatio="none"
           >
             <defs>
               {series.map(s => (
                 <linearGradient key={s.key} id={gid(s.key)} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={s.color} stopOpacity="0.18" />
-                  <stop offset="100%" stopColor={s.color} stopOpacity="0.02" />
+                  <stop offset="0%" stopColor={s.color} stopOpacity="0.15" />
+                  <stop offset="100%" stopColor={s.color} stopOpacity="0.01" />
                 </linearGradient>
               ))}
             </defs>
 
+            {/* Chart background */}
             <rect x={PAD_L} y={PAD_T} width={CW} height={CH} fill="#fafaf8" rx="2" />
 
-            {[0, 1, 2, 3, 4].map(v => (
+            {/* Horizontal grid lines + Y-axis labels */}
+            {Y_TICKS.map(v => (
               <g key={v}>
                 <line
-                  x1={PAD_L}
-                  y1={sy(v)}
-                  x2={PAD_L + CW}
-                  y2={sy(v)}
-                  stroke={v === 0 ? '#c8c4bc' : '#e8e4dc'}
-                  strokeWidth={v === 0 ? 1.2 : 0.7}
-                  strokeDasharray={v === 0 ? '0' : '4,5'}
+                  x1={PAD_L} y1={sy(v)}
+                  x2={PAD_L + CW} y2={sy(v)}
+                  stroke={v === 0 ? '#b8b4ac' : '#e0dcd4'}
+                  strokeWidth={v === 0 ? 1.5 : 0.8}
+                  strokeDasharray={v === 0 ? '0' : '5,6'}
                 />
-                <text x={PAD_L - 5} y={sy(v) + 4} textAnchor="end" fontSize="10" fill="#aaa">
-                  {v}
+                <text
+                  x={PAD_L - 6} y={sy(v) + 4}
+                  textAnchor="end"
+                  fontSize="10"
+                  fontWeight={v % 2 === 0 ? '600' : '400'}
+                  fill={v % 2 === 0 ? '#6b6660' : '#aaa'}
+                >
+                  {Y_LABELS[v] || v}
                 </text>
               </g>
             ))}
 
-            <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={PAD_T + CH} stroke="#c8c4bc" strokeWidth="1.2" />
+            {/* Left axis line */}
+            <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={PAD_T + CH} stroke="#b8b4ac" strokeWidth="1.5" />
 
+            {/* Vertical tick marks at date labels */}
             {labelIdx.map(di => (
-              <line
-                key={di}
-                x1={sx(di)}
-                y1={PAD_T}
-                x2={sx(di)}
-                y2={PAD_T + CH}
-                stroke="#e8e4dc"
-                strokeWidth="0.5"
-                strokeDasharray="3,5"
-              />
+              <g key={di}>
+                <line
+                  x1={sx(di)} y1={PAD_T}
+                  x2={sx(di)} y2={PAD_T + CH}
+                  stroke="#e8e4dc" strokeWidth="0.6"
+                  strokeDasharray="3,6"
+                />
+                <line
+                  x1={sx(di)} y1={PAD_T + CH}
+                  x2={sx(di)} y2={PAD_T + CH + 4}
+                  stroke="#b8b4ac" strokeWidth="1.2"
+                />
+              </g>
             ))}
 
+            {/* Series: filled area + line + dots + value labels */}
             {series.map(s => {
               const valid = s.points.filter(p => p.score !== null) as { i: number; date: string; score: number }[];
 
+              // Build line path segments (gap on null)
               const segs: string[] = [];
               let cur = '';
-
               s.points.forEach(p => {
                 if (p.score === null) {
-                  if (cur) {
-                    segs.push(cur);
-                    cur = '';
-                  }
+                  if (cur) { segs.push(cur); cur = ''; }
                 } else {
-                  const x = sx(p.i);
-                  const y = sy(p.score);
+                  const x = sx(p.i); const y = sy(p.score);
                   cur += cur ? ` L${x.toFixed(1)},${y.toFixed(1)}` : `M${x.toFixed(1)},${y.toFixed(1)}`;
                 }
               });
-
               if (cur) segs.push(cur);
 
+              // Build filled area under the full valid range
               let area = '';
               if (valid.length >= 2) {
                 area =
-                  valid
-                    .map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.i).toFixed(1)},${sy(p.score).toFixed(1)}`)
-                    .join(' ') +
+                  valid.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.i).toFixed(1)},${sy(p.score).toFixed(1)}`).join(' ') +
                   ` L${sx(valid[valid.length - 1].i).toFixed(1)},${(PAD_T + CH).toFixed(1)}` +
                   ` L${sx(valid[0].i).toFixed(1)},${(PAD_T + CH).toFixed(1)} Z`;
               }
@@ -397,26 +433,19 @@ const dates = useMemo(() => buildCalendarDates(filterKey), [filterKey]);
                   {area && <path d={area} fill={`url(#${gid(s.key)})`} />}
                   {segs.map((d, j) => (
                     <path
-                      key={j}
-                      d={d}
-                      fill="none"
-                      stroke={s.color}
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      key={j} d={d} fill="none"
+                      stroke={s.color} strokeWidth="2.8"
+                      strokeLinecap="round" strokeLinejoin="round"
                     />
                   ))}
+                  {/* Data point dots — larger, white-bordered like reference image */}
                   {s.points.map(p => {
                     if (p.score === null) return null;
-                    const x = sx(p.i);
-                    const y = sy(p.score);
+                    const x = sx(p.i); const y = sy(p.score);
                     return (
                       <g key={p.i}>
-                        <circle cx={x} cy={y} r="6" fill={s.color} fillOpacity="0.15" />
-                        <circle cx={x} cy={y} r="3.5" fill={s.color} stroke="white" strokeWidth="1.8" />
-                        <text x={x} y={y - 8} textAnchor="middle" fontSize="9" fontWeight="700" fill={s.color}>
-                          {p.score}
-                        </text>
+                        <circle cx={x} cy={y} r="5.5" fill="white" stroke={s.color} strokeWidth="2.5" />
+                        <circle cx={x} cy={y} r="2.5" fill={s.color} />
                       </g>
                     );
                   })}
@@ -424,30 +453,27 @@ const dates = useMemo(() => buildCalendarDates(filterKey), [filterKey]);
               );
             })}
 
+            {/* X-axis date labels */}
             {labelIdx.map(di => (
               <text
                 key={di}
-                x={sx(di)}
-                y={PAD_T + CH + 20}
+                x={sx(di)} y={PAD_T + CH + 22}
                 textAnchor="middle"
-                fontSize="10.5"
-                fill="#7a7670"
-                fontWeight="500"
+                fontSize="11" fill="#7a7670" fontWeight="500"
               >
                 {fmtDate(dates[di])}
               </text>
             ))}
           </svg>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 pt-2 border-t border-soft-taupe/20">
+          {/* Legend — matches reference image style: colored line + dot + label */}
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 pt-2.5 border-t border-soft-taupe/20">
             {metrics.map(m => (
-              <span
-                key={m.key}
-                className="flex items-center gap-1.5 text-[11px] font-semibold"
-                style={{ color: m.color }}
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" className="flex-shrink-0">
-                  <circle cx="5" cy="5" r="4" fill={m.color} />
+              <span key={m.key} className="flex items-center gap-2 text-xs font-semibold" style={{ color: m.color }}>
+                <svg width="24" height="10" viewBox="0 0 24 10" className="flex-shrink-0">
+                  <line x1="0" y1="5" x2="24" y2="5" stroke={m.color} strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="12" cy="5" r="4" fill="white" stroke={m.color} strokeWidth="2.2" />
+                  <circle cx="12" cy="5" r="2" fill={m.color} />
                 </svg>
                 {m.label}
               </span>
@@ -736,7 +762,7 @@ useEffect(() => {
 
     try {
       const { data, error } = await supabase
-        .from('care_partner_checkins')
+        .from('caregiver_checkins')
         .select('*')
         .eq('patient_id', patientId)
         .order('check_in_date', { ascending: false });
@@ -756,13 +782,13 @@ useEffect(() => {
   loadCheckIns();
 
   const channel = supabase
-    .channel(`care_partner_checkins_${patientId}`)
+    .channel(`caregiver_checkins_${patientId}`)
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
-        table: 'care_partner_checkins',
+        table: 'caregiver_checkins',
         filter: `patient_id=eq.${patientId}`,
       },
       async () => {
@@ -879,6 +905,14 @@ useEffect(() => {
 
   const sectionGMetrics = [
     { key: 'sy_symptoms', label: 'Symptoms Present', color: '#dc2626' },
+  ];
+
+  const sectionHMetrics = [
+    { key: 'cc_speech',               label: 'Speech',              color: '#2563eb' },
+    { key: 'cc_word_finding',         label: 'Word Finding',        color: '#16a34a' },
+    { key: 'cc_comprehension',        label: 'Comprehension',       color: '#7c3aed' },
+    { key: 'cc_following_directions', label: 'Following Directions', color: '#ea580c' },
+    { key: 'cc_attention',            label: 'Attention',           color: '#db2777' },
   ];
 
   if (loading) {
@@ -1007,18 +1041,18 @@ useEffect(() => {
         )}
       </div>
 
-      {/* ── SECTION 3: Care Partner Progress Graphs ─────────────────────── */}
+      {/* ── SECTION 3: Caregiver Progress Graphs ─────────────────────────── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-warm-bronze" />
-            <h2 className="text-lg font-bold text-charcoal">Care Partner Progress</h2>
+            <h2 className="text-lg font-bold text-charcoal">Caregiver Progress</h2>
           </div>
           <FilterButtons current={filterKey} onChange={setFilterKey} />
         </div>
 
         <p className="text-xs text-medium-gray mb-4">
-          Track progress over time from daily care partner check-ins
+          Track progress over time from daily caregiver check-ins
         </p>
 
         <SectionCombinedGraph
@@ -1080,6 +1114,15 @@ useEffect(() => {
           icon={ThumbsUp}
           color="bg-purple-500"
           metrics={sectionGMetrics}
+          allCheckIns={checkInData}
+          filterKey={filterKey}
+        />
+
+        <SectionCombinedGraph
+          title="H — Communication & Cognition"
+          icon={MessageSquare}
+          color="bg-calm-blue"
+          metrics={sectionHMetrics}
           allCheckIns={checkInData}
           filterKey={filterKey}
         />

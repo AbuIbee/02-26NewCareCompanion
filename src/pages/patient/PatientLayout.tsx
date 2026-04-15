@@ -17,8 +17,8 @@ import PatientCareTeam from './PatientCareTeam';
 import MediaUploader from '@/components/MediaUploader';
 import {
   LayoutDashboard, Calendar, Pill, FileText, Bell,
-  Heart, Smile, Users, MoreHorizontal, ChevronLeft,
-  ChevronRight, Volume2, Sun, Moon, LogOut, ClipboardList, UserCheck, Film, ClipboardPlus, Phone, Gamepad2, X, Menu, ClipboardCheck,
+  Heart, Smile, Users, MoreHorizontal, ChevronRight,
+  Volume2, Sun, Moon, LogOut, ClipboardList, UserCheck, Film, ClipboardPlus, Phone, Gamepad2, X, Menu, ClipboardCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -38,11 +38,21 @@ type PatientView =
   | 'media'
   | 'games';
 
+type GameId =
+  | 'matching'
+  | 'crossword'
+  | 'checkers'
+  | 'chess'
+  | 'wordsearch'
+  | 'solitaire'
+  | 'hangman'
+  | 'brainapps';
+
 export default function PatientLayout() {
   const [currentView, setCurrentView] = useState<PatientView>('dashboard');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<GameId>('matching');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { state, dispatch } = useApp();
@@ -255,58 +265,79 @@ export default function PatientLayout() {
     toast('You have been logged out');
   };
 
+  const handleNavigateToGame = (gameId: string) => {
+    setSelectedGame(gameId as GameId);
+    setCurrentView('games');
+};
+
   const navItems = [
-    { id: 'dashboard'          as PatientView, label: 'Home',                icon: LayoutDashboard },
-    { id: 'checkin'            as PatientView, label: 'Care Partner',         icon: ClipboardList },
-    { id: 'intake'             as PatientView, label: 'Patient Intake Form',  icon: ClipboardPlus },
-    { id: 'emergency_contacts' as PatientView, label: 'Emergency Contacts',   icon: Phone },
-    { id: 'memories'           as PatientView, label: 'Family',               icon: Users },
-    { id: 'mood'               as PatientView, label: 'How I Feel',           icon: Smile },
-    { id: 'reminders'          as PatientView, label: 'Reminders',            icon: Bell },
+    { id: 'dashboard'          as PatientView, label: 'Home',               icon: LayoutDashboard },
+    { id: 'intake'             as PatientView, label: 'Patient Information', icon: ClipboardPlus },
+    { id: 'memories'           as PatientView, label: 'Family',             icon: Users },
+    { id: 'mood'               as PatientView, label: 'How I Feel',         icon: Smile },
+    { id: 'reminders'          as PatientView, label: 'Reminders',          icon: Bell },
+    { id: 'medications'        as PatientView, label: 'Medications',        icon: Pill },
+    { id: 'routines'           as PatientView, label: 'My Day',             icon: Sun },
+    { id: 'media'              as PatientView, label: 'Videos & Media',     icon: Film },
+    { id: 'games'              as PatientView, label: 'Memory Games',       icon: Gamepad2 },
   ];
 
   const moreNavItems = [
-    { id: 'medications' as PatientView, label: 'Medications',    icon: Pill },
-    { id: 'routines'    as PatientView, label: 'My Day',         icon: Calendar },
-    { id: 'documents'   as PatientView, label: 'Papers',         icon: FileText },
-    { id: 'media'       as PatientView, label: 'Videos & Media', icon: Film },
-    { id: 'games'       as PatientView, label: 'Memory Games',   icon: Gamepad2 },
+    { id: 'checkin'            as PatientView, label: 'Caregiver',          icon: ClipboardList },
+    { id: 'emergency_contacts' as PatientView, label: 'Emergency Contacts', icon: Phone },
+    { id: 'documents'          as PatientView, label: 'Papers',             icon: FileText },
   ];
 
-  const allNavItems = [...navItems, ...moreNavItems];
+const renderView = () => {
+  switch (currentView) {
+    case 'dashboard':
+      return <PatientHome onNavigateToGame={handleNavigateToGame} />;
 
-  const renderView = () => {
-    switch (currentView) {
-      case 'dashboard':
-        return <PatientHome />;
-      case 'medications':
-        return <PatientMedications />;
-      case 'routines':
-        return <PatientRoutine />;
-      case 'memories':
-        return <PatientMemories />;
-      case 'mood':
-        return <PatientMoodTracker />;
-      case 'documents':
-        return <PatientDocuments />;
-      case 'reminders':
-        return <PatientReminders />;
-      case 'checkin':
-        return <CarePartnerCheckin />;
-      case 'intake':
-        return <PatientIntakeForm onCompleted={() => setIntakeCompleted(true)} />;
-      case 'emergency_contacts':
-        return <PatientEmergencyContacts />;
-      case 'careteam':
-        return <PatientCareTeam />;
-      case 'media':
-        return <MediaUploader readOnly={false} patientId={state.currentUser?.id} />;
-      case 'games':
-        return <PatientGames />;
-      default:
-        return <PatientHome />;
-    }
-  };
+    case 'medications':
+      return <PatientMedications />;
+
+    case 'routines':
+      return <PatientRoutine />;
+
+    case 'memories':
+      return <PatientMemories />;
+
+    case 'mood':
+      return <PatientMoodTracker />;
+
+    case 'documents':
+      return <PatientDocuments />;
+
+    case 'reminders':
+      return <PatientReminders />;
+
+    case 'checkin':
+      return <CarePartnerCheckin />;
+
+    case 'intake':
+      return <PatientIntakeForm onCompleted={() => setIntakeCompleted(true)} />;
+
+    case 'emergency_contacts':
+      return <PatientEmergencyContacts />;
+
+    case 'careteam':
+      return <PatientCareTeam />;
+
+    case 'media':
+      return <MediaUploader readOnly={false} patientId={state.currentUser?.id} />;
+
+    case 'games':
+      return (
+        <PatientGames
+          initialGame={selectedGame}
+          onNavigateHome={() => setCurrentView('dashboard')}
+        />
+      );
+
+    default:
+      return <PatientHome onNavigateToGame={handleNavigateToGame} />;
+  }
+};
 
   const playSafetyMessage = () => {
     setIsPlaying(true);
@@ -339,105 +370,93 @@ export default function PatientLayout() {
 
   return (
     <div className="h-screen bg-warm-ivory flex overflow-hidden">
-      <aside
-        className={`fixed left-0 top-0 bottom-0 ${getSidebarBg()} border-r border-soft-taupe z-40 transition-all duration-300 hidden md:flex flex-col ${sidebarCollapsed ? 'w-20' : 'w-64'}`}
-      >
+      {/* ── Sidebar — fixed on md+, hidden on mobile (bottom nav handles mobile) ── */}
+      <aside className={`fixed left-0 top-0 bottom-0 ${getSidebarBg()} border-r border-soft-taupe z-40 flex-col w-64 hidden md:flex`}>
+        {/* Logo */}
         <div className="h-14 flex items-center px-4 border-b border-soft-taupe flex-shrink-0">
           <div className="w-10 h-10 bg-warm-bronze rounded-xl flex items-center justify-center flex-shrink-0">
             <Heart className="w-6 h-6 text-white" />
           </div>
-          {!sidebarCollapsed && <span className="ml-3 font-semibold text-charcoal">My Memoria Ally</span>}
+          <span className="ml-3 font-semibold text-charcoal">Memoria Helps</span>
         </div>
 
-        {!sidebarCollapsed && (
-          <div className="px-4 py-2 border-b border-soft-taupe flex-shrink-0">
-            <div className="flex items-center gap-3">
-              {patient?.photoUrl ? (
-                <img
-                  src={patient.photoUrl}
-                  alt={patient.preferredName}
-                  className="w-9 h-9 rounded-full object-cover border-2 border-warm-bronze"
-                />
-              ) : (
-                <div className="w-9 h-9 bg-warm-bronze rounded-full flex items-center justify-center">
-                  <span className="text-white font-medium text-sm">
-                    {patient?.preferredName?.[0] || patient?.firstName?.[0] || '?'}
-                  </span>
-                </div>
-              )}
-              <div>
-                <p className="font-semibold text-charcoal">
-                  {patient?.preferredName || patient?.firstName || 'Welcome'}
-                </p>
-                <p className="text-xs text-medium-gray">
-                  {isEvening ? 'Good Evening' : hour < 12 ? 'Good Morning' : 'Good Afternoon'}
-                </p>
+        {/* Patient greeting */}
+        <div className="px-4 py-2 border-b border-soft-taupe flex-shrink-0">
+          <div className="flex items-center gap-3">
+            {patient?.photoUrl ? (
+              <img src={patient.photoUrl} alt={patient.preferredName}
+                className="w-9 h-9 rounded-full object-cover border-2 border-warm-bronze" />
+            ) : (
+              <div className="w-9 h-9 bg-warm-bronze rounded-full flex items-center justify-center">
+                <span className="text-white font-medium text-sm">
+                  {patient?.preferredName?.[0] || patient?.firstName?.[0] || '?'}
+                </span>
               </div>
+            )}
+            <div>
+              <p className="font-semibold text-charcoal">
+                {patient?.preferredName || patient?.firstName || 'Welcome'}
+              </p>
+              <p className="text-xs text-medium-gray">
+                {isEvening ? 'Good Evening' : hour < 12 ? 'Good Morning' : 'Good Afternoon'}
+              </p>
             </div>
           </div>
-        )}
+        </div>
 
+        {/* Nav items */}
         <nav className="p-2 space-y-0.5 flex-1 overflow-y-auto min-h-0">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-
             return (
-              <button
-                key={item.id}
-                onClick={() => setCurrentView(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? 'bg-warm-bronze/15 text-charcoal font-semibold' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'}`}
-              >
+              <button key={item.id} onClick={() => setCurrentView(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                  isActive ? 'bg-warm-bronze/15 text-charcoal font-semibold' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'
+                }`}>
                 <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-warm-bronze' : ''}`} />
-                {!sidebarCollapsed && (
-                  <span className="font-medium text-sm">{item.label}</span>
-                )}
-                {isActive && !sidebarCollapsed && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="ml-auto w-2 h-2 bg-white rounded-full"
-                  />
-                )}
+                <span className="font-medium text-sm">{item.label}</span>
+                {isActive && <motion.div layoutId="activeIndicator" className="ml-auto w-2 h-2 bg-warm-bronze rounded-full" />}
               </button>
             );
           })}
 
+          {/* ── More section ── */}
           <button
-            onClick={() => setShowMoreMenu(!showMoreMenu)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${showMoreMenu ? 'bg-calm-blue/20 text-calm-blue' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'}`}
-          >
+            onClick={() => setShowMoreMenu(v => !v)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+              showMoreMenu || moreNavItems.some(i => i.id === currentView)
+                ? 'bg-warm-bronze/15 text-charcoal font-semibold'
+                : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'
+            }`}>
             <MoreHorizontal className="w-5 h-5 flex-shrink-0" />
-            {!sidebarCollapsed && (
-              <span className="font-medium text-sm">More</span>
-            )}
-            {!sidebarCollapsed && (
-              <motion.div animate={{ rotate: showMoreMenu ? 180 : 0 }} className="ml-auto">
-                <ChevronRight className="w-4 h-4" />
-              </motion.div>
-            )}
+            <span className="font-medium text-sm">More</span>
+            <motion.div animate={{ rotate: showMoreMenu ? 90 : 0 }} transition={{ duration: 0.2 }} className="ml-auto">
+              <ChevronRight className="w-4 h-4" />
+            </motion.div>
           </button>
 
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {showMoreMenu && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="pl-4 space-y-1 border-l-2 border-soft-taupe ml-4">
+                <div className="ml-4 pl-3 border-l-2 border-soft-taupe space-y-0.5 mt-0.5 pb-0.5">
                   {moreNavItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = currentView === item.id;
-
                     return (
-                      <button
-                        key={item.id}
-                        onClick={() => setCurrentView(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${isActive ? 'bg-warm-bronze/15 text-charcoal font-semibold' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'}`}
-                      >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
-                        {!sidebarCollapsed && <span className="font-medium text-sm">{item.label}</span>}
+                      <button key={item.id}
+                        onClick={() => { setCurrentView(item.id); setShowMoreMenu(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                          isActive ? 'bg-warm-bronze/15 text-charcoal font-semibold' : 'text-medium-gray hover:bg-soft-taupe hover:text-charcoal'
+                        }`}>
+                        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-warm-bronze' : ''}`} />
+                        <span className="font-medium text-sm">{item.label}</span>
                       </button>
                     );
                   })}
@@ -447,40 +466,22 @@ export default function PatientLayout() {
           </AnimatePresence>
         </nav>
 
+        {/* Bottom actions */}
         <div className="p-3 border-t border-soft-taupe space-y-1 flex-shrink-0">
-          <button
-            onClick={playSafetyMessage}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-soft-sage/10 text-soft-sage hover:bg-soft-sage/20 transition-colors"
-          >
+          <button onClick={playSafetyMessage}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-soft-sage/10 text-soft-sage hover:bg-soft-sage/20 transition-colors">
             <Volume2 className={`w-5 h-5 flex-shrink-0 ${isPlaying ? 'animate-pulse' : ''}`} />
-            {!sidebarCollapsed && (
-              <span className="font-medium text-sm">
-                {isPlaying ? 'Playing...' : 'Hear "You\'re Safe"'}
-              </span>
-            )}
+            <span className="font-medium text-sm">{isPlaying ? 'Playing...' : 'Hear "You\'re Safe"'}</span>
           </button>
-
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-medium-gray hover:bg-soft-taupe transition-colors"
-          >
-            <ChevronLeft
-              className={`w-5 h-5 flex-shrink-0 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`}
-            />
-            {!sidebarCollapsed && <span className="font-medium text-sm">Collapse</span>}
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-gentle-coral hover:bg-gentle-coral/10 transition-colors"
-          >
+          <button onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-gentle-coral hover:bg-gentle-coral/10 transition-colors">
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!sidebarCollapsed && <span className="font-medium text-sm">Logout</span>}
+            <span className="font-medium text-sm">Logout</span>
           </button>
         </div>
       </aside>
 
-      <main className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'} overflow-y-auto pb-16 md:pb-0`}>
+      <main className="flex-1 md:ml-64 overflow-y-auto pb-16 md:pb-0 min-w-0">
         <div className="min-h-screen">
           {isSundowningTime && (
             <div className="bg-warm-amber/10 border-b border-warm-amber/20 px-4 py-3">

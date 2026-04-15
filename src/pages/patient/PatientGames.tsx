@@ -596,260 +596,336 @@ function WordSearchGame({ onBack }: { onBack: () => void }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SOLITAIRE — Full Klondike with click-to-move
+// SOLITAIRE — Klondike, click-to-move + timer + auto-complete
 // ══════════════════════════════════════════════════════════════════════════════
 type Suit = '♠'|'♥'|'♦'|'♣';
-type SolCard = { suit: Suit; value: number; faceUp: boolean };
+type SolCard = { suit: Suit; value: number; faceUp: boolean; id: string };
 const SUITS: Suit[] = ['♠','♥','♦','♣'];
-const RED_SUITS: Suit[] = ['♥','♦'];
+const RED: Suit[] = ['♥','♦'];
 const VL = ['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const isRed = (s: Suit) => RED.includes(s);
 
 function makeDeck(): SolCard[] {
-  const deck: SolCard[] = [];
-  for (const suit of SUITS) for (let v = 1; v <= 13; v++) deck.push({ suit, value: v, faceUp: false });
-  return deck.sort(() => Math.random() - 0.5);
+  const d: SolCard[] = [];
+  for (const s of SUITS) for (let v=1;v<=13;v++) d.push({suit:s,value:v,faceUp:false,id:`${s}${v}`});
+  return d.sort(()=>Math.random()-0.5);
 }
-function isRed(s: Suit) { return RED_SUITS.includes(s); }
 function initSol() {
-  const deck = makeDeck(); let idx = 0;
+  const deck=makeDeck(); let idx=0;
   const tableau: SolCard[][] = [];
-  for (let i = 0; i < 7; i++) {
-    const col: SolCard[] = [];
-    for (let j = 0; j <= i; j++) { const card = { ...deck[idx++] }; card.faceUp = j===i; col.push(card); }
+  for (let i=0;i<7;i++){
+    const col:SolCard[]=[];
+    for(let j=0;j<=i;j++){const c={...deck[idx++]};c.faceUp=j===i;col.push(c);}
     tableau.push(col);
   }
-  return { tableau, stock: deck.slice(idx).map(c=>({...c,faceUp:false})), waste: [] as SolCard[], foundations: [[],[],[],[]] as SolCard[][] };
+  return {tableau,stock:deck.slice(idx).map(c=>({...c,faceUp:false})),waste:[] as SolCard[],foundations:[[],[],[],[]] as SolCard[][]};
 }
-type SolState = ReturnType<typeof initSol>;
-function canTab(card: SolCard, col: SolCard[]) {
-  if (col.length===0) return card.value===13;
-  const top = col[col.length-1];
-  return top.faceUp && isRed(top.suit)!==isRed(card.suit) && card.value===top.value-1;
-}
-function canFound(card: SolCard, pile: SolCard[]) {
-  if (pile.length===0) return card.value===1;
-  const top = pile[pile.length-1];
-  return top.suit===card.suit && card.value===top.value+1;
-}
+type SolState=ReturnType<typeof initSol>;
 
-function SolitaireGame({ onBack }: { onBack: () => void }) {
-  const [drawMode, setDrawMode] = useState<1|3>(1);
-  const [state, setState] = useState<SolState>(() => initSol());
-  const [sel, setSel] = useState<{src:string;cards:SolCard[]}|null>(null);
-  const [won, setWon] = useState(false);
-  const [moves, setMoves] = useState(0);
+const canTab=(card:SolCard,col:SolCard[])=>{
+  if(!col.length) return card.value===13;
+  const t=col[col.length-1];
+  return t.faceUp && isRed(t.suit)!==isRed(card.suit) && card.value===t.value-1;
+};
+const canFound=(card:SolCard,pile:SolCard[])=>{
+  if(!pile.length) return card.value===1;
+  const t=pile[pile.length-1];
+  return t.suit===card.suit && card.value===t.value+1;
+};
 
-  const newGame = (dm: 1|3 = drawMode) => { setState(initSol()); setSel(null); setWon(false); setMoves(0); setDrawMode(dm); };
+function SolitaireGame({onBack}:{onBack:()=>void}){
+  const [draw,setDraw]=useState<1|3>(1);
+  const [gs,setGs]=useState<SolState>(()=>initSol());
+  const [sel,setSel]=useState<{src:string;cards:SolCard[]}|null>(null);
+  const [won,setWon]=useState(false);
+  const [moves,setMoves]=useState(0);
+  const [secs,setSecs]=useState(0);
+  const timer=useRef<ReturnType<typeof setInterval>|null>(null);
 
-  const drawStock = () => {
-    setState(prev => {
-      const s = JSON.parse(JSON.stringify(prev)) as SolState;
-      if (s.stock.length === 0) {
-        s.stock = [...s.waste].reverse().map(c => ({ ...c, faceUp: false }));
-        s.waste = [];
-      } else {
-        const count = Math.min(drawMode, s.stock.length);
-        for (let i = 0; i < count; i++) { const card = s.stock.pop()!; card.faceUp = true; s.waste.push(card); }
-      }
-      return s;
-    });
-    setMoves(m => m + 1); setSel(null);
+  const startTimer=()=>{
+    if(timer.current) clearInterval(timer.current);
+    setSecs(0);
+    timer.current=setInterval(()=>setSecs(s=>s+1),1000);
+  };
+  useEffect(()=>{ startTimer(); return ()=>{if(timer.current)clearInterval(timer.current);}; },[]);
+
+  const fmt=(s:number)=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+
+  const newGame=(dm:1|3=draw)=>{setGs(initSol());setSel(null);setWon(false);setMoves(0);setDraw(dm);startTimer();};
+
+  const clone=(s:SolState):SolState=>JSON.parse(JSON.stringify(s));
+
+  const apply=(s:SolState)=>{
+    const w=s.foundations.every(f=>f.length===13);
+    setGs(s);setMoves(m=>m+1);setSel(null);
+    if(w){if(timer.current)clearInterval(timer.current);setTimeout(()=>setWon(true),300);}
   };
 
-  const applyMove = (newState: SolState) => {
-    const isWon = newState.foundations.every(f => f.length === 13);
-    setState(newState); setMoves(m => m + 1); setSel(null);
-    if (isWon) setTimeout(() => setWon(true), 200);
+  const removeSrc=(s:SolState,src:string)=>{
+    if(src==='waste'){s.waste.pop();return;}
+    const[,si,ci]=src.split('-').map(Number);
+    s.tableau[si]=s.tableau[si].slice(0,ci);
+    if(s.tableau[si].length) s.tableau[si][s.tableau[si].length-1].faceUp=true;
   };
 
-  const removeFromSrc = (s: SolState, src: string) => {
-    if (src === 'waste') { s.waste.pop(); }
-    else { const [,si,ci] = src.split('-').map(Number); s.tableau[si] = s.tableau[si].slice(0, ci); if (s.tableau[si].length > 0) s.tableau[si][s.tableau[si].length - 1].faceUp = true; }
-  };
-
-  const autoSendToFoundation = (card: SolCard, src: string): boolean => {
-    for (let fi = 0; fi < 4; fi++) {
-      if (canFound(card, state.foundations[fi])) {
-        const s = JSON.parse(JSON.stringify(state)) as SolState;
-        removeFromSrc(s, src);
-        s.foundations[fi].push(card);
-        applyMove(s);
-        return true;
+  const autoFound=(card:SolCard,src:string):boolean=>{
+    for(let fi=0;fi<4;fi++){
+      if(canFound(card,gs.foundations[fi])){
+        const s=clone(gs);removeSrc(s,src);s.foundations[fi].push(card);apply(s);return true;
       }
     }
     return false;
   };
 
-  const dblClickWaste = () => {
-    if (!state.waste.length) return;
-    autoSendToFoundation(state.waste[state.waste.length - 1], 'waste');
+  const drawStock=()=>{
+    const s=clone(gs);
+    if(!s.stock.length){s.stock=[...s.waste].reverse().map(c=>({...c,faceUp:false}));s.waste=[];}
+    else{const n=Math.min(draw,s.stock.length);for(let i=0;i<n;i++){const c=s.stock.pop()!;c.faceUp=true;s.waste.push(c);}}
+    setGs(s);setSel(null);setMoves(m=>m+1);
   };
 
-  const dblClickTab = (ci: number, ri: number) => {
-    const col = state.tableau[ci]; const card = col[ri];
-    if (!card?.faceUp || ri !== col.length - 1) return;
-    autoSendToFoundation(card, `tableau-${ci}-${ri}`);
+  const clickWaste=()=>{
+    if(!gs.waste.length)return;
+    if(sel?.src==='waste'){setSel(null);return;}
+    setSel({src:'waste',cards:[gs.waste[gs.waste.length-1]]});
   };
 
-  const clickWaste = () => {
-    if (!state.waste.length) return;
-    if (sel?.src === 'waste') { setSel(null); return; }
-    setSel({ src: 'waste', cards: [state.waste[state.waste.length - 1]] });
-  };
-
-  const clickTab = (ci: number, ri: number) => {
-    const col = state.tableau[ci]; const card = col[ri];
-    if (!card?.faceUp) return;
-    if (sel) {
-      if (canTab(sel.cards[0], col)) {
-        const s = JSON.parse(JSON.stringify(state)) as SolState;
-        removeFromSrc(s, sel.src);
-        s.tableau[ci].push(...sel.cards);
-        applyMove(s);
-      } else if (sel.src === `tableau-${ci}-${ri}`) { setSel(null); }
-      else { setSel({ src: `tableau-${ci}-${ri}`, cards: col.slice(ri) }); }
+  const clickTab=(ci:number,ri:number)=>{
+    const col=gs.tableau[ci];const card=col[ri];
+    if(!card?.faceUp)return;
+    if(sel){
+      if(canTab(sel.cards[0],col)){
+        const s=clone(gs);removeSrc(s,sel.src);s.tableau[ci].push(...sel.cards);apply(s);
+      } else if(sel.src===`tableau-${ci}-${ri}`){setSel(null);}
+      else{setSel({src:`tableau-${ci}-${ri}`,cards:col.slice(ri)});}
       return;
     }
-    setSel({ src: `tableau-${ci}-${ri}`, cards: col.slice(ri) });
+    setSel({src:`tableau-${ci}-${ri}`,cards:col.slice(ri)});
   };
 
-  const clickFound = (fi: number) => {
-    if (!sel || sel.cards.length !== 1) { setSel(null); return; }
-    const card = sel.cards[0];
-    if (canFound(card, state.foundations[fi])) {
-      const s = JSON.parse(JSON.stringify(state)) as SolState;
-      removeFromSrc(s, sel.src);
-      s.foundations[fi].push(card);
-      applyMove(s);
-    } else { setSel(null); }
+  const clickEmptyTab=(ci:number)=>{
+    if(!sel||!canTab(sel.cards[0],[]))return;
+    const s=clone(gs);removeSrc(s,sel.src);s.tableau[ci].push(...sel.cards);apply(s);
   };
 
-  const CardFace = ({ card, compact = false }: { card: SolCard; compact?: boolean }) => {
-    const red = isRed(card.suit);
-    return (
-      <div className={`flex flex-col justify-between h-full px-1.5 py-1 ${red ? 'text-red-600' : 'text-gray-900'}`}>
-        <div className={`font-extrabold leading-none ${compact ? 'text-sm' : 'text-base sm:text-lg'}`}>{VL[card.value]}{card.suit}</div>
-        <div className={`text-center ${compact ? 'text-xl' : 'text-2xl sm:text-3xl'}`}>{card.suit}</div>
-        <div className={`font-extrabold leading-none rotate-180 self-end ${compact ? 'text-sm' : 'text-base sm:text-lg'}`}>{VL[card.value]}{card.suit}</div>
+  const clickFound=(fi:number)=>{
+    if(!sel||sel.cards.length!==1){setSel(null);return;}
+    if(canFound(sel.cards[0],gs.foundations[fi])){
+      const s=clone(gs);removeSrc(s,sel.src);s.foundations[fi].push(sel.cards[0]);apply(s);
+    } else setSel(null);
+  };
+
+  const dblWaste=()=>{if(gs.waste.length)autoFound(gs.waste[gs.waste.length-1],'waste');};
+  const dblTab=(ci:number,ri:number)=>{
+    const col=gs.tableau[ci];const card=col[ri];
+    if(card?.faceUp&&ri===col.length-1)autoFound(card,`tableau-${ci}-${ri}`);
+  };
+
+  const autoComplete=()=>{
+    let s=clone(gs);let changed=true;let n=0;
+    while(changed&&n<300){
+      changed=false;n++;
+      for(let ci=0;ci<7;ci++){
+        const col=s.tableau[ci];if(!col.length)continue;
+        const card=col[col.length-1];
+        for(let fi=0;fi<4;fi++){
+          if(canFound(card,s.foundations[fi])){
+            s.tableau[ci]=col.slice(0,-1);s.foundations[fi].push(card);
+            if(s.tableau[ci].length)s.tableau[ci][s.tableau[ci].length-1].faceUp=true;
+            changed=true;break;
+          }
+        }
+        if(changed)break;
+      }
+      if(!changed&&s.waste.length){
+        const wc=s.waste[s.waste.length-1];
+        for(let fi=0;fi<4;fi++){
+          if(canFound(wc,s.foundations[fi])){s.waste.pop();s.foundations[fi].push(wc);changed=true;break;}
+        }
+      }
+    }
+    const w=s.foundations.every(f=>f.length===13);
+    setGs(s);setSel(null);
+    if(w){if(timer.current)clearInterval(timer.current);setTimeout(()=>setWon(true),300);}
+  };
+
+  const allFaceUp=gs.tableau.every(c=>c.every(card=>card.faceUp))&&!gs.stock.length;
+  const progress=Math.round(gs.foundations.reduce((a,f)=>a+f.length,0)/52*100);
+
+  // Card components
+  const CardFace=({card,compact=false}:{card:SolCard;compact?:boolean})=>{
+    const red=isRed(card.suit);
+    return(
+      <div className={`flex flex-col justify-between h-full px-1.5 py-1 ${red?'text-red-500':'text-gray-900'}`}>
+        <div className={`font-bold leading-none ${compact?'text-xs':'text-sm'}`}>{VL[card.value]}<br/><span>{card.suit}</span></div>
+        <div className="text-center text-2xl">{card.suit}</div>
+        <div className={`font-bold leading-none rotate-180 self-end ${compact?'text-xs':'text-sm'}`}>{VL[card.value]}<br/><span>{card.suit}</span></div>
       </div>
     );
   };
 
-  // Bright accessible highlight: thick yellow ring + scale
-  const selRing = 'border-yellow-400 ring-4 ring-yellow-300 shadow-2xl scale-[1.04]';
-  const cardBase = 'w-14 sm:w-16 h-20 sm:h-24 md:h-28 rounded-xl border-2 flex-shrink-0 cursor-pointer select-none transition-all overflow-hidden';
-  const wasteTop = drawMode === 3 ? state.waste.slice(-3) : state.waste.slice(-1);
+  const CardBack=({style,cls=''}:{style?:React.CSSProperties;cls?:string})=>(
+    <div style={style} className={`absolute w-14 h-20 rounded-lg border-2 border-blue-800 select-none
+      bg-gradient-to-br from-blue-700 to-blue-900 ${cls}`}>
+      <div className="m-1 rounded border border-blue-400/30 w-[calc(100%-8px)] h-[calc(100%-8px)]"
+        style={{background:'repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 6px)'}}/>
+    </div>
+  );
 
-  return (
-    <div className="w-full max-w-5xl mx-auto space-y-5 p-4">
-      <div className="flex items-center gap-3 flex-wrap">
-        <button onClick={onBack} className="p-3 rounded-xl bg-soft-taupe/30 hover:bg-soft-taupe transition-colors"><ChevronLeft className="w-6 h-6" /></button>
-        <h2 className="text-2xl font-bold text-charcoal">Solitaire</h2>
-        <span className="text-base text-medium-gray ml-1">Moves: <strong className="text-charcoal">{moves}</strong></span>
-        <div className="flex items-center gap-1 bg-soft-taupe/30 rounded-xl p-1 ml-2">
-          {([1,3] as const).map(d => (
-            <button key={d} onClick={() => newGame(d)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-colors ${drawMode===d?'bg-warm-bronze text-white shadow':'text-medium-gray hover:text-charcoal'}`}>
+  const selRing='border-yellow-400 ring-4 ring-yellow-300 shadow-2xl -translate-y-1 z-50';
+  const cardCls='absolute w-14 h-20 rounded-lg border-2 bg-white cursor-pointer select-none transition-all duration-100';
+
+  const wasteShow=draw===3?gs.waste.slice(-3):gs.waste.slice(-1);
+
+  return(
+    <div className="w-full max-w-3xl mx-auto p-3 space-y-3">
+
+      {/* Header */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button onClick={onBack} className="p-2 rounded-xl bg-soft-taupe/30 hover:bg-soft-taupe"><ChevronLeft className="w-5 h-5"/></button>
+        <h2 className="text-lg font-bold text-charcoal">Klondike Solitaire</h2>
+        <div className="flex items-center gap-3 text-sm text-medium-gray ml-1">
+          <span>🕐 {fmt(secs)}</span>
+          <span>♟ {moves}</span>
+        </div>
+        <div className="flex gap-1 bg-soft-taupe/30 rounded-xl p-1 ml-auto">
+          {([1,3] as const).map(d=>(
+            <button key={d} onClick={()=>newGame(d)}
+              className={`px-3 py-1 rounded-lg text-sm font-bold transition-colors ${draw===d?'bg-warm-bronze text-white':'text-medium-gray hover:text-charcoal'}`}>
               Draw {d}
             </button>
           ))}
         </div>
-        <button onClick={() => newGame()} className="ml-auto flex items-center gap-2 px-4 py-2 bg-soft-taupe/40 hover:bg-soft-taupe rounded-xl text-base text-medium-gray transition-colors">
-          <RotateCcw className="w-5 h-5" /> New Game
+        <button onClick={()=>newGame()} className="flex items-center gap-1 px-3 py-2 bg-soft-taupe/40 hover:bg-soft-taupe rounded-xl text-sm text-medium-gray">
+          <RotateCcw className="w-4 h-4"/> New
         </button>
+        {allFaceUp&&(
+          <button onClick={autoComplete}
+            className="flex items-center gap-1 px-3 py-2 bg-soft-sage text-white rounded-xl text-sm font-semibold hover:bg-green-600 animate-pulse hover:animate-none">
+            ✨ Finish
+          </button>
+        )}
       </div>
 
-      {sel
-        ? <p className="text-sm font-semibold text-yellow-800 bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-2">✋ Card selected — tap a column or foundation to place it. Tap same card to deselect.</p>
-        : <p className="text-sm text-medium-gray bg-soft-taupe/10 rounded-xl px-4 py-2">Tap a card to select, tap where to place it. <strong>Double-tap</strong> any face-up card to auto-send it to a foundation.</p>
-      }
+      {/* Progress */}
+      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-full bg-gradient-to-r from-warm-bronze to-soft-sage transition-all duration-700 rounded-full"
+          style={{width:`${progress}%`}}/>
+      </div>
 
-      {/* Top row: stock, waste fan, gap, foundations */}
-      <div className="flex gap-2 sm:gap-3 items-start">
-        <div onClick={drawStock}
-          className={`${cardBase} flex flex-col items-center justify-center gap-1 ${state.stock.length > 0 ? 'bg-blue-700 border-blue-900 hover:bg-blue-600' : 'bg-gray-200 border-gray-300 hover:bg-gray-300'}`}>
-          {state.stock.length > 0
-            ? <><span className="text-white text-3xl">🂠</span><span className="text-white/70 text-xs font-bold">{state.stock.length}</span></>
-            : <span className="text-gray-400 text-3xl">↺</span>}
+      {/* Hint */}
+      <div className={`text-xs px-3 py-2 rounded-xl ${sel?'bg-yellow-50 border border-yellow-200 text-yellow-800 font-semibold':'bg-soft-taupe/20 text-medium-gray'}`}>
+        {sel
+          ? `✋ ${VL[sel.cards[0].value]}${sel.cards[0].suit} selected (${sel.cards.length} card${sel.cards.length>1?'s':''}) — tap destination. Tap same card to deselect.`
+          : 'Tap a card to select, tap where to place it. Double-tap to auto-send to foundation.'}
+      </div>
+
+      {/* Top row */}
+      <div className="flex gap-2 items-start">
+
+        {/* Stock */}
+        <div className="relative w-14 h-20 flex-shrink-0 cursor-pointer" onClick={drawStock}>
+          {gs.stock.length>0
+            ?<><CardBack/><span className="absolute bottom-1 right-1 text-white text-xs font-bold bg-black/40 rounded px-1 z-10">{gs.stock.length}</span></>
+            :<div className="w-14 h-20 rounded-lg border-2 border-dashed border-gray-300 bg-white/40 flex items-center justify-center hover:border-gray-400 cursor-pointer">
+              <span className="text-2xl text-gray-300">↺</span>
+            </div>
+          }
         </div>
 
-        <div className="relative flex-shrink-0" style={{ width: drawMode === 3 && wasteTop.length > 1 ? `${56 + (wasteTop.length-1)*20}px` : '56px', height: '80px' }}>
-          {wasteTop.length === 0 && (
-            <div className={`${cardBase} absolute left-0 top-0 bg-white border-gray-200 flex items-center justify-center text-gray-300 text-2xl`}>—</div>
+        {/* Waste fan */}
+        <div className="relative flex-shrink-0"
+          style={{width:draw===3&&wasteShow.length>1?`${56+(wasteShow.length-1)*18}px`:'56px',height:'80px'}}>
+          {wasteShow.length===0&&(
+            <div className="w-14 h-20 rounded-lg border-2 border-dashed border-gray-200 bg-white/30 flex items-center justify-center">
+              <span className="text-gray-200 text-xl">—</span>
+            </div>
           )}
-          {wasteTop.map((card, i) => {
-            const isTop = i === wasteTop.length - 1;
-            const isSel = isTop && sel?.src === 'waste';
-            return (
-              <div key={`w-${i}-${card.value}${card.suit}`}
-                style={{ position: 'absolute', left: `${i * 20}px`, top: 0, zIndex: i + 1 }}
-                onClick={isTop ? clickWaste : undefined}
-                onDoubleClick={isTop ? dblClickWaste : undefined}
-                className={`${cardBase} bg-white
-                  ${isTop ? (isSel ? selRing : 'border-gray-300 hover:border-warm-bronze hover:shadow-lg') : 'border-gray-300 cursor-default'}`}>
-                <CardFace card={card} compact={drawMode===3 && !isTop} />
+          {wasteShow.map((card,i)=>{
+            const isTop=i===wasteShow.length-1;
+            const isSel=isTop&&sel?.src==='waste';
+            return(
+              <div key={card.id}
+                style={{position:'absolute',left:`${i*18}px`,top:0,zIndex:i+1}}
+                onClick={isTop?clickWaste:undefined}
+                onDoubleClick={isTop?dblWaste:undefined}
+                className={`${cardCls} ${isTop?(isSel?selRing:'border-gray-300 hover:border-warm-bronze hover:shadow-lg hover:-translate-y-0.5'):'border-gray-200 cursor-default'}`}>
+                <CardFace card={card} compact={draw===3&&!isTop}/>
               </div>
             );
           })}
         </div>
 
-        <div className="flex-1" />
+        <div className="flex-1"/>
 
-        {state.foundations.map((pile, i) => (
-          <div key={i} onClick={() => clickFound(i)}
-            className={`${cardBase} overflow-hidden transition-all
-              ${sel ? 'bg-green-50 border-green-400 ring-2 ring-green-400 hover:ring-4' : 'bg-green-50/60 border-green-200 hover:border-green-400'}`}>
-            {pile.length > 0
-              ? <CardFace card={pile[pile.length - 1]} />
-              : <div className="w-full h-full flex items-center justify-center">
-                  <span className={`text-3xl font-black ${sel ? 'text-green-500' : 'text-green-200'}`}>{SUITS[i]}</span>
-                </div>}
+        {/* Foundations */}
+        {gs.foundations.map((pile,fi)=>(
+          <div key={fi} className="relative w-14 h-20 flex-shrink-0">
+            {pile.length===0
+              ?<div onClick={()=>clickFound(fi)}
+                className={`w-14 h-20 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer transition-colors
+                  ${sel?'border-yellow-400 bg-yellow-50 ring-2 ring-yellow-300':'border-gray-300 bg-white/50 hover:border-gray-400'}`}>
+                <span className={`text-xl font-black ${sel?'text-yellow-500':'text-gray-300'}`}>{SUITS[fi]}</span>
+              </div>
+              :<div onClick={()=>clickFound(fi)}
+                className={`${cardCls} ${sel?'border-green-400 ring-2 ring-green-300 hover:ring-4':'border-green-200 hover:border-green-400'}`}
+                style={{position:'relative'}}>
+                <CardFace card={pile[pile.length-1]}/>
+              </div>
+            }
           </div>
         ))}
       </div>
 
       {/* Tableau */}
-      <div className="flex gap-1 sm:gap-2 items-start overflow-x-auto pb-4">
-        {state.tableau.map((col, ci) => (
-          <div key={ci} className="flex flex-col relative flex-shrink-0" style={{ minHeight: '7rem', minWidth: '56px' }}
-            onClick={() => col.length === 0 && sel && clickTab(ci, 0)}>
-            {col.length === 0 && (
-              <div className={`${cardBase} bg-green-50/40 border-dashed flex items-center justify-center
-                ${sel ? 'border-green-400 ring-2 ring-green-300' : 'border-gray-300'}`}>
-                <span className={`text-2xl font-black ${sel ? 'text-green-500' : 'text-gray-300'}`}>K</span>
+      <div className="flex gap-1.5 items-start overflow-x-auto pb-4">
+        {gs.tableau.map((col,ci)=>(
+          <div key={ci} className="flex-shrink-0"
+            style={{position:'relative',width:'56px',minHeight:`${80+Math.max(0,col.length-1)*26+4}px`}}>
+            {col.length===0
+              ?<div onClick={()=>clickEmptyTab(ci)}
+                className={`w-14 h-20 rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer transition-colors
+                  ${sel&&sel.cards[0]?.value===13?'border-yellow-400 bg-yellow-50 ring-2 ring-yellow-300':'border-gray-300 bg-white/40 hover:border-gray-400'}`}>
+                <span className={`text-xl font-black ${sel&&sel.cards[0]?.value===13?'text-yellow-500':'text-gray-300'}`}>K</span>
               </div>
-            )}
-            {col.map((card, ri) => {
-              const inStack = sel?.src.startsWith(`tableau-${ci}-`) && ri >= parseInt(sel.src.split('-')[2]);
-              return (
-                <div key={ri}
-                  onClick={(e) => { e.stopPropagation(); clickTab(ci, ri); }}
-                  onDoubleClick={(e) => { e.stopPropagation(); dblClickTab(ci, ri); }}
-                  style={{ marginTop: ri === 0 ? 0 : card.faceUp ? '-58px' : '-76px' }}
-                  className={`${cardBase} overflow-hidden
-                    ${card.faceUp
-                      ? inStack ? `bg-white ${selRing}` : 'bg-white border-gray-300 hover:border-warm-bronze hover:shadow-md'
-                      : 'bg-gradient-to-br from-blue-600 to-blue-900 border-blue-900 cursor-default'}`}>
-                  {card.faceUp ? <CardFace card={card} /> : <div className="w-full h-full" />}
-                </div>
-              );
-            })}
+              :col.map((card,ri)=>{
+                const offset=ri*26;
+                const inSel=!!(sel?.src.startsWith(`tableau-${ci}-`)&&ri>=parseInt(sel.src.split('-')[2]??'9999'));
+                if(!card.faceUp){
+                  return<CardBack key={card.id} style={{top:`${offset}px`,left:0,zIndex:ri+1}}/>;
+                }
+                return(
+                  <div key={card.id}
+                    onClick={(e)=>{e.stopPropagation();clickTab(ci,ri);}}
+                    onDoubleClick={(e)=>{e.stopPropagation();dblTab(ci,ri);}}
+                    style={{top:`${offset}px`,left:0,zIndex:inSel?50+ri:ri+1}}
+                    className={`${cardCls} ${inSel?selRing:'border-gray-200 hover:border-warm-bronze hover:shadow-md hover:-translate-y-0.5'}`}>
+                    <CardFace card={card}/>
+                  </div>
+                );
+              })
+            }
           </div>
         ))}
       </div>
 
+      {/* Win */}
       <AnimatePresence>
-        {won && (
-          <motion.div initial={{ opacity:0, scale:0.8 }} animate={{ opacity:1, scale:1 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-md w-full space-y-4">
-              <div className="text-7xl">🃏</div>
-              <h3 className="text-2xl font-bold text-charcoal">You Win!</h3>
-              <p className="text-medium-gray text-lg">Completed in <strong>{moves}</strong> moves</p>
-              <div className="flex gap-3">
-                <button onClick={() => newGame(1)} className="flex-1 py-3 bg-soft-taupe/40 text-charcoal rounded-2xl font-semibold text-lg hover:bg-soft-taupe transition-colors">Draw 1</button>
-                <button onClick={() => newGame(3)} className="flex-1 py-3 bg-warm-bronze text-white rounded-2xl font-semibold text-lg hover:bg-warm-bronze/90 transition-colors">Draw 3</button>
+        {won&&(
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <motion.div initial={{scale:0.7,y:40}} animate={{scale:1,y:0}} transition={{type:'spring',bounce:0.4}}
+              className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full space-y-5">
+              <div className="text-6xl">🎉</div>
+              <h3 className="text-3xl font-bold text-charcoal">You Won!</h3>
+              <div className="flex gap-8 justify-center">
+                <div><p className="text-3xl font-bold text-warm-bronze">{moves}</p><p className="text-sm text-medium-gray">Moves</p></div>
+                <div><p className="text-3xl font-bold text-warm-bronze">{fmt(secs)}</p><p className="text-sm text-medium-gray">Time</p></div>
               </div>
-            </div>
+              <div className="flex gap-3">
+                <button onClick={()=>newGame(1)} className="flex-1 py-3 bg-soft-taupe/40 text-charcoal rounded-2xl font-semibold hover:bg-soft-taupe">Draw 1</button>
+                <button onClick={()=>newGame(3)} className="flex-1 py-3 bg-warm-bronze text-white rounded-2xl font-semibold hover:bg-deep-bronze">Draw 3</button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
